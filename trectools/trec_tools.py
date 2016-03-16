@@ -17,9 +17,9 @@ from scipy import stats
 class trec_misc:
 
     @staticmethod
-    def sort_trec_res_by(list_system_result, metric="map"):
+    def sort_trec_res_by(list_trec_res, metric="map"):
         r = []
-        for system in list_system_result:
+        for system in list_trec_res:
             # TODO: check for exceptions
             r.append((system.get_result(metric), system.get_runid()))
         return sorted(r, key=lambda x:x[0], reverse=True)
