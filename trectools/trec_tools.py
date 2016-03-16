@@ -106,6 +106,20 @@ class trec_qrel:
         # Removes the files that were not judged:
         self.qrels_data = self.qrels_data[self.qrels_data["rel"] >= 0]
 
+    def topics(self):
+        return self.qrels_data["query"].unique()
+
+    def fill_up(self, another_qrel):
+        """
+            Complete the judgments for topics that have no judgement yet. It does not change anything in topics that have
+            already some judgment.
+        """
+        new_topics = set(another_qrel.topics()) - set(self.topics())
+        for topic in new_topics:
+            new_data = another_qrel.qrels_data[another_qrel.qrels_data["query"] == topic]
+            self.qrels_data = pd.concat((self.qrels_data,new_data))
+            logging.warning("Added topic %s" % str(topic))
+
     def get_filename(self):
         return os.path.realpath(os.path.expanduser(self.filename))
 
