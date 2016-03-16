@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+# Standard libraries
+from subprocess import call
+import os
+
+# External libraries
 import pandas as pd
 import numpy as np
 from sklearn import metrics
 from scipy import stats
+
 
 class trec_misc:
 
@@ -92,10 +98,14 @@ class trec_qrel:
             self.read_qrel(filename, qrels_header)
 
     def read_qrel(self, filename, qrels_header=["query","q0","filename","rel"]):
+        self.filename = filename
         self.qrels_data = pd.read_csv(filename, sep="\s+", names=qrels_header)
 
         # Removes the files that were not judged:
         self.qrels_data = self.qrels_data[self.qrels_data["rel"] >= 0]
+
+    def get_filename(self):
+        return os.path.realpath(os.path.expanduser(self.filename))
 
     def get_number_of(self, label):
         return (self.qrels_data["rel"] == label).sum()
@@ -126,7 +136,6 @@ class trec_qrel:
 
         r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"]) # TODO: rename fields as done in trec_res
 
-
         if r.shape[0] == 0:
             print "No registers in common"
             return np.nan
@@ -149,10 +158,21 @@ class trec_qrel:
 '''
 '''
 class trec_run:
-    def __init__(self):
-        pass
+    def __init__(self, filename=None):
+        if filename:
+            self.read_run(filename)
+
+    def get_filename(self):
+        return os.path.abspath(os.path.expanduser(self.filename))
 
     def read_run(self, filename, run_header=["query", "q0", "docid", "rank", "score", "system"]):
         self.run_data = pd.read_csv(filename, sep="\s+", names=run_header)
+        self.filename = filename
 
+    def evaluate_run(self, a_trec_qrel, outfile=None):
+        # TODO: use subprocess.
+        if not outfile:
+            outfile = self.get_filename() + ".res"
+        os.system("trec_eval -q %s %s > %s" % (a_trec_qrel.get_filename(), self.get_filename(), outfile))
+        return trec_res(outfile)
 
