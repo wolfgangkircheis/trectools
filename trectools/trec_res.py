@@ -6,6 +6,8 @@ import logging
 # External libraries
 import pandas as pd
 
+from scipy.stats import ttest_ind
+
 
 '''
 '''
@@ -30,6 +32,15 @@ class TrecRes:
 
     def get_runid(self):
         return self.runid
+
+    def compare_with(self, another_res, metric="P_10"):
+        a = pd.Series(self.get_results_for_metric(metric))
+        b = pd.Series(another_res.get_results_for_metric(metric))
+        merged = pd.concat((a,b), axis=1)
+        if merged.isnull().any().sum() > 0:
+            merged = merged.dropna()
+            print "The results do not share the same topics. Evaluating results on %d topics." % (merged.shape[0])
+        return ttest_ind(merged[0], merged[1])
 
     def get_result(self, metric="P_10", query="all"):
         return self.data[(self.data[self.header[0]] == metric) & (self.data[self.header[1]] == query)]["value"].values[0]
