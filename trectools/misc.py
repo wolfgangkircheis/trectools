@@ -7,6 +7,24 @@ import logging
 import numpy as np
 from scipy import stats
 
+def unique_documents(list_of_runs, cutoff=10):
+    # TODO: this should return a <RUN, [documents] >, in which for each RUN, we have a list
+    # of documents that were uniquely provided by this RUN
+    pass
+
+def make_pool(list_of_runs, cutoff=10):
+    pool_documents = set([])
+    if len(list_of_runs) == 0:
+        return pool_documents
+
+    topics = set([])
+    for run in list_of_runs:
+        topics = topics.union(run.topics())
+        for t in topics:
+            pool_documents = pool_documents.union(run.get_top_documents(t, n=cutoff))
+
+    return pool_documents
+
 def sort_systems_by(list_trec_res, metric="map"):
     r = []
     for system in list_trec_res:
