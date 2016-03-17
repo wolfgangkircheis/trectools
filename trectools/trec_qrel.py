@@ -28,14 +28,14 @@ class TrecQrel:
         self.qrels_data = self.qrels_data[self.qrels_data["rel"] >= 0]
 
     def topics(self):
-        return self.qrels_data["query"].unique()
+        return set(self.qrels_data["query"].unique())
 
     def fill_up(self, another_qrel):
         """
             Complete the judgments for topics that have no judgement yet. It does not change anything in topics that have
             already some judgment.
         """
-        new_topics = set(another_qrel.topics()) - set(self.topics())
+        new_topics = another_qrel.topics() - self.topics()
         for topic in new_topics:
             new_data = another_qrel.qrels_data[another_qrel.qrels_data["query"] == topic]
             self.qrels_data = pd.concat((self.qrels_data,new_data))
