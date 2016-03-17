@@ -1,5 +1,4 @@
 # Standard libraries
-# from subprocess import call # TODO: change os.system to subprocess
 # TODO: use logging properly
 import logging
 
