@@ -29,6 +29,14 @@ class TrecQrel:
         else:
             return "Data file not set yet"
 
+    def __filter_topics(self, df, topics):
+        if type(topics) is list:
+            topics = set(topics)
+        if type(topics) is not set:
+            print "ERROR: topics should be a set"
+            return None
+        return df[df["query"].apply(lambda x: x in topics)]
+
     def read_qrel(self, filename, qrels_header=["query","q0","filename","rel"]):
         self.filename = filename
         self.qrels_data = pd.read_csv(filename, sep="\s+", names=qrels_header)
@@ -78,12 +86,10 @@ class TrecQrel:
         """
         r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"]) # TODO: rename fields as done in trec_res
         if topics:
-            if type(topics) is list:
-                topics = set(topics)
-            if type(topics) is not set:
-                print "ERROR: topics should be a set"
+            r = self.__filter_topics(r, topics)
+            if r is None:
+                print "ERROR in filtering topics"
                 return None
-            r = r[r["query"].apply(lambda x: x in topics)]
             print "Resulting topics being used: ", r["query"].unique()
         return metrics.confusion_matrix(r["rel_x"], r["rel_y"], labels)
 
