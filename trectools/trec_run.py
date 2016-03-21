@@ -20,6 +20,15 @@ class TrecRun:
         if filename:
             self.read_run(filename)
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        if self.filename:
+            return "Data from file %s" % (self.get_filename())
+        else:
+            return "Data file not set yet"
+
     def get_filename(self):
         return os.path.abspath(os.path.expanduser(self.filename))
 

@@ -20,6 +20,15 @@ class TrecQrel:
         if filename:
             self.read_qrel(filename, qrels_header)
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        if self.filename:
+            return "Data from file %s" % (self.get_filename())
+        else:
+            return "Data file not set yet"
+
     def read_qrel(self, filename, qrels_header=["query","q0","filename","rel"]):
         self.filename = filename
         self.qrels_data = pd.read_csv(filename, sep="\s+", names=qrels_header)

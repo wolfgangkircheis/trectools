@@ -2,6 +2,7 @@
 # from subprocess import call # TODO: change os.system to subprocess
 # TODO: use logging properly
 import logging
+import os
 
 # External libraries
 import pandas as pd
@@ -18,10 +19,23 @@ class TrecRes:
             self.read_res(filename, result_header)
             self.header = result_header
 
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        if self.filename:
+            return "Data from file %s" % (self.get_filename())
+        else:
+            return "Data file not set yet"
+
+    def get_filename(self):
+        return os.path.realpath(os.path.expanduser(self.filename))
+
     def read_res(self, filename, result_header=["metric", "query", "value"], double_values=True):
         if len(result_header) != 3:
             print "ERROR: the header of your file should have size 3. Now it is", len(result_header)
 
+        self.filename = filename
         self.data = pd.read_csv(filename, sep="\s+", names=result_header)
         self.header = result_header
         self.runid = self.data[self.data[self.header[0]] == 'runid'][self.header[2]].get_values()[0]
