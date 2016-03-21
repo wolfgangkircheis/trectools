@@ -60,3 +60,28 @@ class TrecRun:
             res = TrecRes(".tmp_res")
             run("rm -f .tmp_res")
             return res
+
+    def evaluate_understandability(self, a_trec_qrel, a_trec_qread, p=0.8, stoprank=10, outfile=None, printfile=True):
+        """
+            It is necessary to have ubire.jar set on your classpath to run this function.
+        """
+        if printfile:
+            if not outfile:
+                outfile = self.get_filename() + ".ures"
+
+            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > %s" % (a_trec_qrel.get_filename(), a_trec_qread.get_filename(), p, stoprank, self.get_filename(), outfile)
+            print cmd
+            run(cmd).returncode
+            return TrecRes(outfile)
+
+        else:
+            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > .tmp_ures" % (a_trec_qrel.get_filename(), a_trec_qread.get_filename(), p, stoprank, self.get_filename())
+
+            print cmd
+            run(cmd).returncode
+            res = TrecRes(".tmp_ures")
+            run("rm -f .tmp_ures")
+            return res
+
+
+
