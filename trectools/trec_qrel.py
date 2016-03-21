@@ -44,6 +44,14 @@ class TrecQrel:
         # Removes the files that were not judged:
         self.qrels_data = self.qrels_data[self.qrels_data["rel"] >= 0]
 
+    def describe(self, topics=None):
+        if topics is not None:
+            dslice = self.__filter_topics(self.qrels_data, topics)
+            if dslice is not None:
+                return dslice["rel"].describe()
+        else:
+            return self.qrels_data["rel"].describe()
+
     def topics(self):
         return set(self.qrels_data["query"].unique())
 
