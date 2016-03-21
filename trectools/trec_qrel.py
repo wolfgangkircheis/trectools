@@ -72,7 +72,19 @@ class TrecQrel:
         pass
 
     def check_confusion_matrix(self, another_qrel, topics=None, labels=None):
+        """
+            Returns a confusion matrix for the topics that this qrel and another_qrel have in common.
+            Use the paramenters topics and labels to restrict even more the topics and labels shown.
+        """
         r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"]) # TODO: rename fields as done in trec_res
+        if topics:
+            if type(topics) is list:
+                topics = set(topics)
+            if type(topics) is not set:
+                print "ERROR: topics should be a set"
+                return None
+            r = r[r["query"].apply(lambda x: x in topics)]
+            print "Resulting topics being used: ", r["query"].unique()
         return metrics.confusion_matrix(r["rel_x"], r["rel_y"], labels)
 
     def check_agreement(self, another_qrel, topics=None, labels=None):
