@@ -44,6 +44,29 @@ class TrecQrel:
         # Removes the files that were not judged:
         self.qrels_data = self.qrels_data[self.qrels_data["rel"] >= 0]
 
+    def compare_with(self, another_qrel, topics=None):
+        """
+            Compare two qrels for a given set of topics.
+            Returns means and checks for statistical significant differences.
+            Only compares documents that are available in both sets.
+            Use 'topics' parameter if you want to filter even further.
+        """
+        if topics is not None:
+            dslice = self.__filter_topics(self.qrels_data, topics)
+            oslice = self.__filter_topics(another_qrel.qrels_data, topics)
+        else:
+            dslice = self.qrels_data
+            oslice = another_qrel.qrels_data
+
+        merged = pd.merge(dslice, oslice, on=["query","q0","filename"])
+        a = merged["rel_x"]
+        b = merged["rel_y"]
+        s, p = ttest_ind(a,b)
+        print "This:  %.2f - %.2f" % (a.mean(), a.std())
+        print "Other: %.2f - %.2f" % (b.mean(), b.std())
+        print "significance: ", p
+        return (a.mean(), a.std(), b.mean(), b.std(), p)
+
     def describe(self, topics=None):
         if topics is not None:
             dslice = self.__filter_topics(self.qrels_data, topics)
