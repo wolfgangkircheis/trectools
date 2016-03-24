@@ -57,7 +57,14 @@ class TrecRes:
         return ttest_ind(merged[0], merged[1])
 
     def get_result(self, metric="P_10", query="all"):
-        return self.data[(self.data[self.header[0]] == metric) & (self.data[self.header[1]] == query)]["value"].values[0]
+        if metric not in self.data["metric"].unique():
+            print "Metric %s was not found" % (metric)
+            return None
+        v = self.data[(self.data[self.header[0]] == metric) & (self.data[self.header[1]] == query)][self.header[2]]
+        if v.shape[0] == 0:
+            print "Could not find any result using metric %s and query %s" % (metric, query)
+            return None
+        return v.values[0]
 
     def get_results_for_metric(self, metric="P_10", ignore_all_row=True):
         '''
