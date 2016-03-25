@@ -114,8 +114,12 @@ class TrecQrel:
     def get_filename(self):
         return os.path.realpath(os.path.expanduser(self.filename))
 
-    def get_number_of(self, label):
-        return (self.qrels_data["rel"] == label).sum()
+    def get_number_of(self, label, topics=None):
+        if topics is not None:
+            dslice = self.qrels_data[self.qrels_data["query"].apply(lambda x: x in set(topics))]
+            return (dslice["rel"] == label).sum()
+        else:
+            return (self.qrels_data["rel"] == label).sum()
 
     def check_kappa(self, another_qrel):
         r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"]) # TODO: rename fields as done in trec_res
