@@ -97,6 +97,9 @@ class TrecQrel:
     def topics(self):
         return set(self.qrels_data["query"].unique())
 
+    def topics_intersection_with(self, another_qrel):
+        return self.topics().intersection(another_qrel.topics())
+
     def fill_up(self, another_qrel):
         """
             Complete the judgments for topics that have no judgement yet. It does not change anything in topics that have
