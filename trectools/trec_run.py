@@ -29,6 +29,11 @@ class TrecRun:
         else:
             return "Data file not set yet"
 
+    def print_subset(self, filename, topics):
+        dslice = self.run_data[self.run_data["query"].apply(lambda x: x in set(topics))]
+        dslice.sort_values(by=["query","score"], ascending=[True,False]).to_csv(filename, sep=" ", header=False, index=False)
+        print "File %s writen." % (filename)
+
     def get_filename(self):
         return os.path.abspath(os.path.expanduser(self.filename))
 

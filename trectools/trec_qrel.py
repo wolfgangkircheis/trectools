@@ -37,6 +37,25 @@ class TrecQrel:
             return None
         return df[df["query"].apply(lambda x: x in topics)]
 
+    def print_subset(self, filename, topics=None, labels=None):
+        """
+            Creates a new qrel with name 'filename' based on the selected topics or labels
+        """
+        dslice = None
+        if topics is not None and labels is None:
+            dslice = self.qrels_data[self.qrels_data["query"].apply(lambda x: x in set(topics))]
+        elif labels is not None and topics is None:
+            dslice = self.qrels_data[self.qrels_data["rel"].apply(lambda x: x in set(labels))]
+        elif labels is not None and topics is not None:
+            dslice = self.qrels_data[(self.qrels_data["query"].apply(lambda x: x in set(topics))) &
+                    (self.qrels_data["rel"].apply(lambda x: x in set(labels)))]
+        else:
+            print "You should set labels or topics to be filtered"
+            return
+
+        dslice.to_csv(filename, sep=" ", header=False, index=False)
+        print "File %s writen." % (filename)
+
     def read_qrel(self, filename, qrels_header=["query","q0","filename","rel"]):
         self.filename = filename
         self.qrels_data = pd.read_csv(filename, sep="\s+", names=qrels_header)
