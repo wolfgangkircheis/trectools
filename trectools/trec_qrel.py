@@ -128,6 +128,10 @@ class TrecQrel:
             return (self.qrels_data["rel"] == label).sum()
 
     def check_kappa(self, another_qrel):
+        """
+            Kappa coeficient for binary data only.
+        """
+        # TODO: check if there are only two categories.
         r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"]) # TODO: rename fields as done in trec_res
         a, b = r["rel_x"], r["rel_y"]
         p0 = 1. * (a == b).sum() / a.shape[0]
@@ -156,10 +160,22 @@ class TrecQrel:
             print "Resulting topics being used: ", r["query"].unique()
         return metrics.confusion_matrix(r["rel_x"], r["rel_y"], labels)
 
+    def explore_agreement(self, another_qrel, topic):
+        """
+            Giving another set of relevance assessments and a topic, it returns for each document whether or not an agreement was found.
+        """
+        slice1 = self.qrels_data[self.qrels_data["query"] == topic]
+        slice2 = another_qrel.qrels_data[another_qrel.qrels_data["query"] == topic]
+
+        return pd.merge(slice1, slice2, on=["query","q0","filename"])
+
+
     def check_agreement(self, another_qrel, topics=None, labels=None):
 
-        #TODO: add support for filtering some labels
-        #TODO: check if the fields match.
+        if labels is not None:
+            #TODO: add support for filtering some labels
+            print "SORRY LABEL SUPPORT NOT IMPLEMENTED YET"
+            return None
 
         r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"]) # TODO: rename fields as done in trec_res
 
