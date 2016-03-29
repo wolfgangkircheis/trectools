@@ -24,12 +24,15 @@ class TrecRes:
 
     def __str__(self):
         if self.filename:
-            return "Data from file %s" % (self.get_filename())
+            return "Data from file %s" % (self.get_full_filename_path())
         else:
             return "Data file not set yet"
 
-    def get_filename(self):
+    def get_full_filename_path(self):
         return os.path.realpath(os.path.expanduser(self.filename))
+
+    def get_filename(self):
+        return os.path.basename(self.get_full_filename_path())
 
     def read_res(self, filename, result_header=["metric", "query", "value"], double_values=True):
         if len(result_header) != 3:

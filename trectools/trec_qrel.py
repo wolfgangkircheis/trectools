@@ -17,6 +17,8 @@ from scipy.stats import ttest_ind
 '''
 class TrecQrel:
     def __init__(self, filename=None, qrels_header=["query","q0","filename","rel"]):
+
+        #TODO: support to check whether the fields match.
         if filename:
             self.read_qrel(filename, qrels_header)
 
@@ -25,7 +27,7 @@ class TrecQrel:
 
     def __str__(self):
         if self.filename:
-            return "Data from file %s" % (self.get_filename())
+            return "Data from file %s" % (self.get_full_filename_path())
         else:
             return "Data file not set yet"
 
@@ -84,7 +86,8 @@ class TrecQrel:
         print "This:  %.2f - %.2f" % (a.mean(), a.std())
         print "Other: %.2f - %.2f" % (b.mean(), b.std())
         print "significance: ", p
-        return (a.mean(), a.std(), b.mean(), b.std(), p)
+        print "number of examples: ", a.shape[0]
+        return (a.mean(), a.std(), b.mean(), b.std(), p, a.shape[0])
 
     def describe(self, topics=None):
         if topics is not None:
@@ -111,8 +114,11 @@ class TrecQrel:
             self.qrels_data = pd.concat((self.qrels_data,new_data))
             logging.warning("Added topic %s" % str(topic))
 
+    def get_full_filename_path(self):
+        return os.path.abspath(os.path.expanduser(self.filename))
+
     def get_filename(self):
-        return os.path.realpath(os.path.expanduser(self.filename))
+        return os.path.basename(self.get_full_filename_path())
 
     def get_number_of(self, label, topics=None):
         if topics is not None:

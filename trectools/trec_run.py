@@ -25,7 +25,7 @@ class TrecRun:
 
     def __str__(self):
         if self.filename:
-            return "Data from file %s" % (self.get_filename())
+            return "Data from file %s" % (self.get_full_filename_path())
         else:
             return "Data file not set yet"
 
@@ -34,11 +34,17 @@ class TrecRun:
         dslice.sort_values(by=["query","score"], ascending=[True,False]).to_csv(filename, sep=" ", header=False, index=False)
         print "File %s writen." % (filename)
 
-    def get_filename(self):
+    def get_full_filename_path(self):
         return os.path.abspath(os.path.expanduser(self.filename))
+
+    def get_filename(self):
+        return os.path.basename(self.get_full_filename_path())
 
     def topics(self):
         return set(self.run_data["query"].unique())
+
+    def topics_intersection_with(self, another_run):
+        return self.topics().intersection(another_run.topics())
 
     def read_run(self, filename, run_header=["query", "q0", "docid", "rank", "score", "system"]):
         self.run_data = pd.read_csv(filename, sep="\s+", names=run_header)
@@ -50,14 +56,14 @@ class TrecRun:
     def evaluate_run(self, a_trec_qrel, outfile=None, printfile=True):
         if printfile:
             if not outfile:
-                outfile = self.get_filename() + ".res"
-            cmd = "trec_eval -q %s %s > %s" % (a_trec_qrel.get_filename(), self.get_filename(), outfile)
+                outfile = self.get_full_filename_path() + ".res"
+            cmd = "trec_eval -q %s %s > %s" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path(), outfile)
             logging.warning("Running: %s " % (cmd))
             run(cmd).returncode
             # TODO: treat exceptions
             return TrecRes(outfile)
         else:
-            cmd = "trec_eval -q %s %s > .tmp_res" % (a_trec_qrel.get_filename(), self.get_filename())
+            cmd = "trec_eval -q %s %s > .tmp_res" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path())
             logging.warning("Running: %s " % (cmd))
             # TODO: treat exceptions
             run(cmd).returncode
@@ -72,15 +78,15 @@ class TrecRun:
         """
         if printfile:
             if not outfile:
-                outfile = self.get_filename() + ".ures"
+                outfile = self.get_full_filename_path() + ".ures"
 
-            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > %s" % (a_trec_qrel.get_filename(), a_trec_qread.get_filename(), p, stoprank, self.get_filename(), outfile)
+            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > %s" % (a_trec_qrel.get_full_filename_path(), a_trec_qread.get_full_filename_path(), p, stoprank, self.get_full_filename_path(), outfile)
             print cmd
             run(cmd).returncode
             return TrecRes(outfile)
 
         else:
-            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > .tmp_ures" % (a_trec_qrel.get_filename(), a_trec_qread.get_filename(), p, stoprank, self.get_filename())
+            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > .tmp_ures" % (a_trec_qrel.get_full_filename_path(), a_trec_qread.get_full_filename_path(), p, stoprank, self.get_full_filename_path())
 
             print cmd
             run(cmd).returncode
