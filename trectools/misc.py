@@ -29,7 +29,9 @@ def sort_systems_by(list_trec_res, metric="map"):
     for system in list_trec_res:
         # TODO: check for exceptions
         r.append((system.get_result(metric), system.get_runid()))
-    return sorted(r, key=lambda x:x[0], reverse=True)
+
+    # Sorting twice to have first the values sorted descending and then the run name sorted ascending
+    return sorted(sorted(r,key=lambda x:x[1]), key=lambda x:x[0], reverse=True)
 
 
 def get_correlation(sorted1, sorted2, correlation="kendall"):
