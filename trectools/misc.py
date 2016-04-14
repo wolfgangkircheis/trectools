@@ -63,7 +63,7 @@ def get_correlation(sorted1, sorted2, correlation="kendall"):
             #print c[i+1], (i)
         p = 1. / (N-1) * summation
         #print "P", p
-        return 2 * p - 1.
+        return (2 * p - 1., -1)
 
     if len(sorted1) != len(sorted2):
         print "ERROR: Arrays must have the same size. Given arrays have size (%d) and (%d)." % (len(sorted1), len(sorted2))
