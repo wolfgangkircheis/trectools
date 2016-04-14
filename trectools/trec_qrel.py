@@ -39,10 +39,18 @@ class TrecQrel:
             return None
         return df[df["query"].apply(lambda x: x in topics)]
 
-    def print_subset(self, filename, topics=None, labels=None):
+    def print_subset(self, filename, topics=None, labels=None, another_qrel=None):
         """
-            Creates a new qrel with name 'filename' based on the selected topics or labels
+            Creates a new qrel with name 'filename' based on the selected topics or labels.
+
+            A common use case is to have all documents that appear in another qrel. For that,
+            use 'another_qrel' parameter.
         """
+
+        if another_qrel is None and labels is None and topics is None:
+            print "You should assign a set of labels, topics or at least input another qrel to be filtered."
+            return
+
         dslice = None
         if topics is not None and labels is None:
             dslice = self.qrels_data[self.qrels_data["query"].apply(lambda x: x in set(topics))]
@@ -51,11 +59,16 @@ class TrecQrel:
         elif labels is not None and topics is not None:
             dslice = self.qrels_data[(self.qrels_data["query"].apply(lambda x: x in set(topics))) &
                     (self.qrels_data["rel"].apply(lambda x: x in set(labels)))]
-        else:
-            print "You should set labels or topics to be filtered"
-            return
 
-        dslice.to_csv(filename, sep=" ", header=False, index=False)
+        if another_qrel:
+            if dslice is None:
+                dslice = self.qrels_data
+            dslice = pd.merge(dslice, another_qrel.qrels_data, on=["query","q0","filename"])
+            dslice["rel"] = dslice["rel_x"]
+            del dslice["rel_y"]
+            del dslice["rel_x"]
+
+        dslice[["query", "q0", "filename", "rel"]].to_csv(filename, sep=" ", header=False, index=False)
         print "File %s writen." % (filename)
 
     def read_qrel(self, filename, qrels_header=["query","q0","filename","rel"]):
