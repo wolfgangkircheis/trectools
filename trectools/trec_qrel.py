@@ -216,9 +216,14 @@ class TrecQrel:
         return 1.0 * (r["rel_x"] == r["rel_y"]).sum() / r.shape[0]
 
     def merge_with(self, another_qrel, operation="or", keep_all=False, filename=None):
+
         if keep_all:
             r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"], how="outer")
             r.fillna(-1, inplace=True)
+            r["q0"] = r["q0"].astype(np.int)
+            # TODO: not desirable as this will limit the queries to be integer
+            r["query"] = r["query"].astype(np.int)
+
         else:
             r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"])
 
@@ -233,7 +238,8 @@ class TrecQrel:
         if keep_all:
             r["rel"] = np.where(r["rel_y"] < 0, r["rel_x"], r["rel"])
             r["rel"] = np.where(r["rel_x"] < 0, r["rel_y"], r["rel"])
-            r["rel"] = r["rel"].astype(np.int)
+
+        r["rel"] = r["rel"].astype(np.int)
 
         if filename:
             r[["query", "q0", "filename", "rel"]].to_csv(filename, sep=" ", header=False, index=False)
