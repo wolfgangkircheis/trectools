@@ -154,6 +154,11 @@ class TrecQrel:
         print "P0: %.2f, Pe = %.2f" % (p0, pe)
         return (p0 - pe) / (1.0 - pe)
 
+    def check_overlap(self, another_qrel, min_rel_label=1):
+        r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"]) # TODO: rename fields as done in trec_res
+        intersection = r[(r["rel_x"] >= min_rel_label) & (r["rel_y"] >= min_rel_label)]
+        union = r[(r["rel_x"] >= min_rel_label) | (r["rel_y"] >= min_rel_label)]
+        return 1. * intersection.shape[0] / union.shape[0]
 
     def check_jaccard(self, another_qrel, topics=None):
         # TODO
