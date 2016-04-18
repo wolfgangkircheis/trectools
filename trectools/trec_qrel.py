@@ -215,4 +215,28 @@ class TrecQrel:
 
         return 1.0 * (r["rel_x"] == r["rel_y"]).sum() / r.shape[0]
 
+    def merge_with(self, another_qrel, operation="or", keep_others=False, filename=None):
+        if keep_others:
+            r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"], how="left")
+            r.fillna(-1, inplace=True)
+            r["rel_y"] = r["rel_y"].astype(np.int)
+        else:
+            r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"])
+
+        if operation == "or":
+            r["rel"] = r[["rel_x", "rel_y"]].apply(max, axis=1)
+        elif operation == "and":
+            r["rel"] = r[["rel_x", "rel_y"]].apply(min, axis=1)
+        else:
+            print "ERROR: No such operation %s. Options are 'or', 'and'." % (operation)
+            return None
+
+        if keep_others:
+            r["rel"] = np.where(r["rel_y"] < 0, r["rel_x"], r["rel"])
+
+        if filename:
+            r[["query", "q0", "filename", "rel"]].to_csv(filename, sep=" ", header=False, index=False)
+            print "File %s writen." % (filename)
+
+        return r[["query", "q0", "filename", "rel"]]
 
