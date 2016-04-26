@@ -12,15 +12,17 @@ def unique_documents(list_of_runs, cutoff=10):
     pass
 
 def make_pool(list_of_runs, cutoff=10):
-    pool_documents = set([])
+    pool_documents = {}
     if len(list_of_runs) == 0:
         return pool_documents
 
-    topics = set([])
+    topics_seen = set([])
     for run in list_of_runs:
-        topics = topics.union(run.topics())
-        for t in topics:
-            pool_documents = pool_documents.union(run.get_top_documents(t, n=cutoff))
+        topics_seen = topics_seen.union(run.topics())
+        for t in topics_seen:
+            if t not in pool_documents.keys():
+                pool_documents[t] = set([])
+            pool_documents[t] = pool_documents[t].union(run.get_top_documents(t, n=cutoff))
 
     return pool_documents
 
