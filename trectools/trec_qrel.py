@@ -247,3 +247,17 @@ class TrecQrel:
 
         return r[["query", "q0", "filename", "rel"]]
 
+    def get_judgement(self, document, topic):
+        """
+        Returns "rel" value if the pair document-topic is found.
+        Else, returns -1.
+        """
+        returned = self.qrels_data.loc[(self.qrels_data["filename"] == document) & (self.qrels_data["query"] == topic)]
+        if returned.shape[0] > 1:
+            print "ERROR: more than one value returned."
+            return returned
+        elif returned.shape[0] == 1:
+            return returned["rel"].values[0]
+        else:
+            return -1
+
