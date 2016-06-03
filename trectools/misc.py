@@ -1,4 +1,6 @@
 # Standard libraries
+from trectools import TrecPool, TrecRun
+
 # TODO: use logging properly
 import logging
 
@@ -11,10 +13,19 @@ def unique_documents(list_of_runs, cutoff=10):
     # of documents that were uniquely provided by this RUN
     pass
 
-def make_pool(list_of_runs, cutoff=10):
+def make_pool(list_of_runs, strategy="topX", parameter=10):
+    if strategy == "topX":
+        return make_pool_topX(list_of_runs, parameter)
+    elif strategy == "rbp":
+        return make_pool_rbp(list_of_runs, parameter)
+
+def make_pool_rbp(list_of_runs, p):
+    return TrecPool({})
+
+def make_pool_topX(list_of_runs, cutoff=10):
     pool_documents = {}
     if len(list_of_runs) == 0:
-        return pool_documents
+        return TrecPool(pool_documents)
 
     topics_seen = set([])
     for run in list_of_runs:
@@ -24,7 +35,13 @@ def make_pool(list_of_runs, cutoff=10):
                 pool_documents[t] = set([])
             pool_documents[t] = pool_documents[t].union(run.get_top_documents(t, n=cutoff))
 
-    return pool_documents
+    return TrecPool(pool_documents)
+
+def make_pool_from_files(filenames, strategy="topX", parameter=10):
+    runs = []
+    for fname in filenames:
+	runs.append(TrecRun(fname))
+    return make_pool(runs, strategy, parameter)
 
 def sort_systems_by(list_trec_res, metric="map"):
     r = []
