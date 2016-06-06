@@ -89,3 +89,15 @@ class TrecPool:
         else:
             print "Format %s not recognized. Options are 'relevation' and 'filelist'" % (with_format)
         print "Created %s" % (filename)
+
+    def check_coverage(self, trecrun, topX=10):
+        """
+        Given the topX documents of each query, this fuction returns the average number of documents that are in the pool.
+        Example: if topX=10, and this function returns '8.0', it means that on average 80% of the documents in the top 10
+        results of the run are presented in the pool.
+        """
+
+        df = trecrun.run_data.copy()
+        df["found"] = df[["query","docid"]].apply(lambda x: x["docid"] in self.pool[x["query"]], axis = 1)
+        return df.groupby(["query"])["found"].sum().mean()
+
