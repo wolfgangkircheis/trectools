@@ -6,6 +6,7 @@ import logging
 
 # External libraries
 import numpy as np
+import pandas as pd
 from scipy import stats
 
 def unique_documents(list_of_runs, cutoff=10):
@@ -13,14 +14,76 @@ def unique_documents(list_of_runs, cutoff=10):
     # of documents that were uniquely provided by this RUN
     pass
 
-def make_pool(list_of_runs, strategy="topX", parameter=10):
-    if strategy == "topX":
-        return make_pool_topX(list_of_runs, parameter)
-    elif strategy == "rbp":
-        return make_pool_rbp(list_of_runs, parameter)
+def make_pool_from_files(filenames, strategy="topX", topX=10, rbp_strategy="sum", rbp_p=0.80):
+    """
+        Creates a pool object (TrecPool) from a list of filenames.
+        ------
+        strategy = (topX, rbp). Default: topX
+        topX = Integer Value. The number of documents per query to make the pool.
+        rbp_strategy = (max, sum). Only in case strategy=rbp. Default: "sum"
+        rbp_p = A float value for RBP's p. Only in case strategy=rbp. Default: 0.80
+    """
 
-def make_pool_rbp(list_of_runs, p):
-    return TrecPool({})
+    runs = []
+    for fname in filenames:
+	runs.append(TrecRun(fname))
+    return make_pool(runs, strategy, topX=topX, rbp_p=rbp_p, rbp_strategy=rbp_strategy)
+
+
+def make_pool(list_of_runs, strategy="topX", topX=10, rbp_strategy="sum", rbp_p=0.80):
+    """
+        Creates a pool object (TrecPool) from a list of runs.
+        ------
+        strategy = (topX, rbp). Default: topX
+        topX = Integer Value. The number of documents per query to make the pool.
+        rbp_strategy = (max, sum). Only in case strategy=rbp. Default: "sum"
+        rbp_p = A float value for RBP's p. Only in case strategy=rbp. Default: 0.80
+    """
+
+    if strategy == "topX":
+        return make_pool_topX(list_of_runs, cutoff=topX)
+    elif strategy == "rbp":
+        return make_pool_rbp(list_of_runs, topX=topX, p=rbp_p, strategy=rbp_strategy)
+
+def make_pool_rbp(list_of_runs, topX = 100, p=0.80, strategy="sum"):
+    """
+        p = A float value for RBP's p. Default: 0.80
+        Strategy = (max, sum). Default: "sum"
+        topX = Number of documents per query to be used in the pool. Default: 100
+    """
+
+    big_df = pd.DataFrame(columns=["query","docid","rbp_value"])
+
+    for run in list_of_runs:
+        df = run.run_data
+	# NOTE: Everything is made based on the rank col. It should start by '1'
+        df["rbp_value"] = (1.0-p) * (p) ** (df["rank"]-1)
+        # Concatenate all dfs into a single big_df
+        big_df = pd.concat((big_df,df[["query","docid","rbp_value"]]))
+
+    # Choose strategy for merging the different runs.
+    if strategy == "sum":
+        grouped_by_docid = big_df.groupby(["query","docid"])["rbp_value"].sum().reset_index()
+    elif strategy == "max":
+        grouped_by_docid = big_df.groupby(["query","docid"])["rbp_value"].max().reset_index()
+    else:
+        print "Strategy '%s' does not exist. Options are 'sum' and 'max'" % (strategy)
+
+    # Sort documents by rbp value inside each qid group
+    grouped_by_docid.sort_values(by=["query","rbp_value"], ascending=[True,False], inplace=True)
+
+    # Selects only the top X from each query
+    result = grouped_by_docid.groupby("query").head(topX)
+
+    # Transform pandas data into a dictionary
+    pool = {}
+    for row in result[["query", "docid"]].itertuples():
+        q = int(row.query)
+        if q not in pool:
+            pool[q] = set([])
+        pool[q].add(row.docid)
+
+    return TrecPool(pool)
 
 def make_pool_topX(list_of_runs, cutoff=10):
     pool_documents = {}
@@ -36,12 +99,6 @@ def make_pool_topX(list_of_runs, cutoff=10):
             pool_documents[t] = pool_documents[t].union(run.get_top_documents(t, n=cutoff))
 
     return TrecPool(pool_documents)
-
-def make_pool_from_files(filenames, strategy="topX", parameter=10):
-    runs = []
-    for fname in filenames:
-	runs.append(TrecRun(fname))
-    return make_pool(runs, strategy, parameter)
 
 def sort_systems_by(list_trec_res, metric="map"):
     r = []
