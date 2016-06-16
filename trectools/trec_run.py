@@ -8,7 +8,7 @@ import logging
 import os
 
 # External libraries
-from sarge import run
+import sarge
 import pandas as pd
 
 from trectools import TrecRes
@@ -53,23 +53,26 @@ class TrecRun:
     def get_top_documents(self, topic, n=10):
         return list(self.run_data[self.run_data['query'] == topic]["docid"].head(n))
 
-    def evaluate_run(self, a_trec_qrel, outfile=None, printfile=True):
+    def evaluate_external_script(self, cmd, debug=False):
+        if debug:
+            print "Running: %s " % (cmd)
+        sarge.run(cmd).returncode
+
+    def evaluate_run(self, a_trec_qrel, outfile=None, printfile=True, debug=False):
+        """
+            It is necessary to have trec_eval set on your PATH run this function.
+        """
         if printfile:
             if not outfile:
                 outfile = self.get_full_filename_path() + ".res"
             cmd = "trec_eval -q %s %s > %s" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path(), outfile)
-            logging.warning("Running: %s " % (cmd))
-            run(cmd).returncode
-            # TODO: treat exceptions
+            self.evaluate_external_script(cmd, debug)
             return TrecRes(outfile)
         else:
             cmd = "trec_eval -q %s %s > .tmp_res" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path())
-            logging.warning("Running: %s " % (cmd))
-            # TODO: treat exceptions
-            run(cmd).returncode
-
+            self.evaluate_external_script(cmd, debug)
             res = TrecRes(".tmp_res")
-            run("rm -f .tmp_res")
+            sarge.run("rm -f .tmp_res")
             return res
 
     def evaluate_understandability(self, a_trec_qrel, a_trec_qread, p=0.8, stoprank=10, outfile=None, printfile=True):
@@ -79,20 +82,30 @@ class TrecRun:
         if printfile:
             if not outfile:
                 outfile = self.get_full_filename_path() + ".ures"
-
             cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > %s" % (a_trec_qrel.get_full_filename_path(), a_trec_qread.get_full_filename_path(), p, stoprank, self.get_full_filename_path(), outfile)
-            print cmd
-            run(cmd).returncode
+            self.evaluate_external_script(cmd, debug)
             return TrecRes(outfile)
-
         else:
             cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > .tmp_ures" % (a_trec_qrel.get_full_filename_path(), a_trec_qread.get_full_filename_path(), p, stoprank, self.get_full_filename_path())
-
-            print cmd
-            run(cmd).returncode
-            res = TrecRes(".tmp_ures")
-            run("rm -f .tmp_ures")
+            self.evaluate_external_script(cmd, debug)
+            res = TrecRes(".tmp_res")
+            sarge.run("rm -f .tmp_res")
             return res
 
-
+    def evaluate_ndcg(self, a_trec_qrel, outfile=None, printfile=True, debug=False):
+        """
+            It is necessary to have 'mygdeval.pl' set on your PATH run this function.
+        """
+        if printfile:
+            if not outfile:
+                outfile = self.get_full_filename_path() + ".ures"
+            cmd = "mygdeval.pl %s %s > %s" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path(), outfile)
+            self.evaluate_external_script(cmd, debug)
+            return TrecRes(outfile)
+        else:
+            cmd = "mygdeval.pl %s %s > .tmp_res" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path())
+            self.evaluate_external_script(cmd, debug)
+            res = TrecRes(".tmp_res")
+            sarge.run("rm -f .tmp_res")
+            return res
 
