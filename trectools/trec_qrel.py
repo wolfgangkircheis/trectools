@@ -62,7 +62,7 @@ class TrecQrel:
 
         if another_qrel:
             if dslice is None:
-                dslice = self.qrels_data
+                dslice = self.qrels_data.copy()
             dslice = pd.merge(dslice, another_qrel.qrels_data, on=["query","q0","filename"])
             dslice["rel"] = dslice["rel_x"]
             del dslice["rel_y"]
