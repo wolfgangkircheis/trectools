@@ -9,6 +9,33 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+
+def check_fleish_kappa(tuple_of_judgements):
+    items = set()
+    categories = set()
+    n_ij = {}
+    n = len(tuple_of_judgements)
+    for judgement in tuple_of_judgements:
+        for doc, rel in zip(range(judgement.shape[0]), judgement):
+            items.add(doc)
+            categories.add(rel)
+            n_ij[(doc, rel)] = n_ij.get((doc, rel), 0) + 1
+    N = len(items)
+    p_j = {}
+    for c in categories:
+        p_j[c] = sum(n_ij.get((i,c), 0) for i in items) / (1.0*n*N)
+
+    P_i = {}
+    for i in items:
+        P_i[i] = (sum(n_ij.get((i,c), 0)**2 for c in categories)-n) / (n*(n-1.0))
+
+    P_bar = sum(P_i.itervalues()) / (1.0*N)
+    P_e_bar = sum(p_j[c]**2 for c in categories)
+
+    kappa = (P_bar - P_e_bar) / (1 - P_e_bar)
+
+    return kappa
+
 def unique_documents(list_of_runs, cutoff=10):
     # TODO: this should return a <RUN, [documents] >, in which for each RUN, we have a list
     # of documents that were uniquely provided by this RUN
