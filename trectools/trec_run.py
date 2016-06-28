@@ -76,7 +76,7 @@ class TrecRun:
             sarge.run("rm -f .tmp_res")
             return res
 
-    def evaluate_understandability(self, a_trec_qrel, a_trec_qread, p=0.8, stoprank=10, outfile=None, printfile=True):
+    def evaluate_understandability(self, a_trec_qrel, a_trec_qread, p=0.8, stoprank=10, outfile=None, printfile=True, debug=False):
         """
             It is necessary to have ubire.jar set on your classpath to run this function.
         """
@@ -89,8 +89,8 @@ class TrecRun:
         else:
             cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > .tmp_ures" % (a_trec_qrel.get_full_filename_path(), a_trec_qread.get_full_filename_path(), p, stoprank, self.get_full_filename_path())
             self.evaluate_external_script(cmd, debug)
-            res = TrecRes(".tmp_res")
-            sarge.run("rm -f .tmp_res")
+            res = TrecRes(".tmp_ures")
+            sarge.run("rm -f .tmp_ures")
             return res
 
     def evaluate_ndcg(self, a_trec_qrel, outfile=None, printfile=True, debug=False):
@@ -99,15 +99,15 @@ class TrecRun:
         """
         if printfile:
             if not outfile:
-                outfile = self.get_full_filename_path() + ".ures"
+                outfile = self.get_full_filename_path() + ".ndcg_res"
             cmd = "mygdeval.pl %s %s > %s" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path(), outfile)
             self.evaluate_external_script(cmd, debug)
             return TrecRes(outfile)
         else:
-            cmd = "mygdeval.pl %s %s > .tmp_res" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path())
+            cmd = "mygdeval.pl %s %s > .tmp_ndcg_res" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path())
             self.evaluate_external_script(cmd, debug)
-            res = TrecRes(".tmp_res")
-            sarge.run("rm -f .tmp_res")
+            res = TrecRes(".tmp_ndcg_res")
+            sarge.run("rm -f .tmp_ndcg_res")
             return res
 
     def check_qrel_coverage(self, trecqrel, topX=10):
