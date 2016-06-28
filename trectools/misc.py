@@ -144,7 +144,8 @@ def get_correlation(sorted1, sorted2, correlation="kendall"):
     Correlations implemented: kendalltau, pearson, spearman
     """
     def tau_ap(list1, list2):
-    # List2 is the ground truth and list 1 is the list that we want to compare the tau_ap with.
+        # List2 is the ground truth and list 1 is the list that we want to compare the tau_ap with.
+
         N = len(list1)
         # calculate C(i)
         c = [0] * N # C = [0,0,0,0,0,0,....]
@@ -156,7 +157,7 @@ def get_correlation(sorted1, sorted2, correlation="kendall"):
             for other_element in list1[:i+1]:
                 #print "Other element", other_element
                 index_other_in_2 = list2.index(other_element)
-                if index_element_in_2 > index_other_in_2: # Check if it is correctly ranked
+                if index_element_in_2 > index_other_in_2 or other_element == element: # Check if it is correctly ranked
                     c[i] += 1
             #print "C[",i + 2,"]=", c[i]
 
