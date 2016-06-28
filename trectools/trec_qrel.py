@@ -215,6 +215,26 @@ class TrecQrel:
 
         return 1.0 * (r["rel_x"] == r["rel_y"]).sum() / r.shape[0]
 
+    def pairwise_matrix(self, another_qrel):
+        r = pd.merge(self.qrels_data, another_qrel.qrels_data, on=["query","q0","filename"])
+        m = np.zeros((3,3))
+        def fmap(a,b):
+            if a < b:
+                return 0
+            elif a == b:
+                return 1
+            return 2
+        for t in r["query"].unique():
+            tslice = r[r["query"] == t]
+            vs = tslice[["filename","rel_x", "rel_y"]].values
+            for i in range(vs.shape[0]):
+                for j in range(i, vs.shape[0]):
+                    m[fmap(vs[i][1],vs[i][2])][fmap(vs[j][1],vs[j][2])] += 1
+
+        print "Pairwise Agreement: %.2f " % (1.* (m[0][0] + m[1][1] + m[2][2]) / m.sum())
+        print "Total Disagement: %.2f " % (1.* (m[0][2] + m[2][0]) / m.sum())
+        return m
+
     def merge_with(self, another_qrel, operation="or", keep_all=False, filename=None):
 
         if keep_all:
