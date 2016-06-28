@@ -15,8 +15,8 @@ class TrecTerrier:
             # Current dir is used if result_dir is not set
             result_dir = os.getcwd()
 
-        cmd = "%s -r -Dtrec.topics=%s -Dtrec.model=%s -Dtrec.results=%s -Dtrec.results.file=%s" % (self.bin_path,
-                terrierc, topics, model, result_dir, result_file)
+        cmd = "%s -r -Dtrec.topics=%s -Dtrec.model=%s -Dtrec.results=%s -Dtrec.results.file=%s" % (self.bin_path, topics, model,
+                result_dir, result_file)
 
         if terrierc is not None:
             cmd += " -c %d " % (terrierc)
