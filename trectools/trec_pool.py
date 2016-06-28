@@ -96,8 +96,13 @@ class TrecPool:
         Example: if topX=10, and this function returns '8.0', it means that on average 80% of the documents in the top 10
         results of the run are presented in the pool.
         """
-
-        df = trecrun.run_data.copy()
-        df["found"] = df[["query","docid"]].apply(lambda x: x["docid"] in self.pool[x["query"]], axis = 1)
-        return df.groupby(["query"])["found"].sum().mean()
+        covered = []
+        for topic in self.pool.keys():
+            docs = trecrun.get_top_documents(topic, n=topX)
+            cov = 0
+            for d in docs:
+                if d in self.pool[topic]:
+                    cov += 1
+            covered.append(cov)
+        return np.mean(covered)
 
