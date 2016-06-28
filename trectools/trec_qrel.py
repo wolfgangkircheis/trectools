@@ -281,3 +281,8 @@ class TrecQrel:
         else:
             return -1
 
+    def get_document_names_for_topic(self, topicX):
+        """
+            return a set with the names of all documents judged for topic X.
+        """
+        return set(self.qrels_data[self.qrels_data["query"] == topicX]["filename"])
