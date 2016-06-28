@@ -10,6 +10,7 @@ import os
 # External libraries
 import sarge
 import pandas as pd
+import numpy as np
 
 from trectools import TrecRes
 
@@ -108,4 +109,18 @@ class TrecRun:
             res = TrecRes(".tmp_res")
             sarge.run("rm -f .tmp_res")
             return res
+
+    def check_qrel_coverage(self, trecqrel, topX=10):
+
+        covered = []
+        for topic in sorted(self.topics()):
+            cov = 0
+            doc_list = self.get_top_documents(topic, topX)
+            qrels_set = trecqrel.get_document_names_for_topic(topic)
+            for d in doc_list:
+                if d in qrels_set:
+                    cov += 1
+            covered.append(cov)
+        return np.mean(covered)
+
 
