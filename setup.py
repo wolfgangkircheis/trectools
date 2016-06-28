@@ -12,10 +12,11 @@ requirements = [
     "scikit-learn>=0.15",
     "scipy >= 0.10.0",
     "sarge >= 0.1.1",
+    "lxml >= 3.6.0",
 ]
 
 setup(name='trectools',
-        version='0.0.24',
+        version='0.0.28.4',
         author='Joao Palotti',
         author_email='joaopalotti@gmail.com',
         license='BSD',
