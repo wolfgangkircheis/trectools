@@ -80,4 +80,13 @@ class TrecRes:
         r = data_slice.to_dict(orient='list')
         return dict(zip(r[self.header[1]], r[self.header[2]]))
 
+    def printresults(self, outputfilename, outputformat="csv", perquery=False):
+        """
+            outputformat options are 'trec' and 'csv'
+        """
+        if outputformat == 'csv':
+            self.data.pivot("query", "metric", "value").to_csv(outputfilename)
+        else:
+            print "TODO: outputformat %s is not yet available" % (outputformat)
+
 
