@@ -12,7 +12,7 @@ class TrecTopics:
     def set_topic(self, topic_id, topic_text):
         self.topics[topic_id] = topic_text
 
-    def printfile(self, filename="output.xml", outputdir=None):
+    def printfile(self, filename="output.xml", outputdir=None, debug=True):
         """
             This function writes out the topics to a file.
             After one runs this method, TrecTopics.outputfile is available with the
@@ -22,7 +22,8 @@ class TrecTopics:
             outputdir = os.getcwd()
 
         self.outputfile = os.path.join(outputdir, filename)
-        print "Writing topics to %s" % (self.outputfile)
+        if debug == True:
+            print "Writing topics to %s" % (self.outputfile)
 
         # Creates file object
         root = etree.Element('topics')
