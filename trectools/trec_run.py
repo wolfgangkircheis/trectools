@@ -123,4 +123,21 @@ class TrecRun:
             covered.append(cov)
         return np.mean(covered)
 
+    def check_run_coverage(self, another_run, topX=10, debug=False):
+        """
+            Check the intersection of two runs for the topX documents.
+        """
+        runA = self.run_data[["query", "docid"]].groupby("query")[["query","docid"]].head(topX)
+        runB = another_run.run_data[["query", "docid"]].groupby("query")[["query","docid"]].head(topX)
 
+        common_topics = set(runA["query"].unique()).intersection(runB["query"].unique())
+
+        covs = []
+        for topic in common_topics:
+            docsA = set(runA[runA["query"] == topic]["docid"].values)
+            docsB = set(runB[runB["query"] == topic]["docid"].values)
+            covs.append( len(docsA.intersection(docsB)) )
+
+        if debug:
+            print "Evaluated coverage on %d topics: %.3f " % (len(common_topics), np.mean(covs))
+        return np.mean(covs)
