@@ -138,6 +138,10 @@ class TrecRun:
             docsB = set(runB[runB["query"] == topic]["docid"].values)
             covs.append( len(docsA.intersection(docsB)) )
 
+        if len(covs) == 0:
+            print "ERROR: No topics in common."
+            return 0.0
+
         if debug:
             print "Evaluated coverage on %d topics: %.3f " % (len(common_topics), np.mean(covs))
         return np.mean(covs)
