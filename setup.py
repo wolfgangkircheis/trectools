@@ -13,6 +13,7 @@ requirements = [
     "scipy >= 0.10.0",
     "sarge >= 0.1.1",
     "lxml >= 3.6.0",
+    "bs4 >= 0.0.0.1",
 ]
 
 setup(name='trectools',
