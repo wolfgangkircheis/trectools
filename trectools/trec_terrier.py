@@ -9,7 +9,7 @@ class TrecTerrier:
     def __init__(self, bin_path):
         self.bin_path = bin_path
 
-    def run(self, index, topics, debug=True, model="PL2", result_dir=None, result_file="trec_terrier.run", terrierc=None, qexp=False, expTerms=5, expDocs=3, expModel="Bo1", showoutput=False):
+    def run(self, index, topics, debug=True, model="PL2", ndocs=1000, result_dir=None, result_file="trec_terrier.run", terrierc=None, qexp=False, expTerms=5, expDocs=3, expModel="Bo1", showoutput=False):
 
         if result_dir is None:
             # Current dir is used if result_dir is not set
@@ -17,6 +17,8 @@ class TrecTerrier:
 
         cmd = "%s -r -Dtrec.topics=%s -Dtrec.model=%s -Dtrec.results=%s -Dtrec.results.file=%s" % (self.bin_path, topics, model,
                 result_dir, result_file)
+
+        cmd += " -Dmatching.retrieved_set_size=%d " % (ndocs)
 
         if terrierc is not None:
             cmd += " -c %d " % (terrierc)
