@@ -1,10 +1,41 @@
 from lxml import etree
+import codecs
+from bs4 import BeautifulSoup
 import os
 
 class TrecTopics:
 
     def __init__(self, topics={}):
         self.topics = topics
+
+    def read_topics_from_file(self, filename, topic_tag="topic", numberid_tag="number", number_attr=True, querytext_tag="query", debug=False):
+        """
+            Reads a xml file into a TrecTopics object. Example:
+            <topics>
+            <topic number="201" type="single">
+                <query>amazon raspberry pi</query>
+                <description> You have heard quite a lot about cheap computing as being the way of the future,
+                including one recent model called a Raspberry Pi. You start thinking about buying one, and wonder how much they cost.
+                </description>
+            </topic>
+            </topics>
+
+            If your query number is a tag <number> 201 </number>, set number_attr = False.
+
+        """
+        # TODO: throw an exception for errors when reading the topics.
+	soup = BeautifulSoup(codecs.open(filename, "r"), "lxml")
+
+	for topic in soup.findAll(topic_tag):
+            if number_attr:
+                topic_id = topic.get(numberid_tag)
+            else:
+                topic_id = topic.findNext(numberid_tag).getText()
+
+            query = topic.findNext(querytext_tag).getText()
+            if debug:
+                print "Number: %s Query: %s" % (topic_id, query)
+            self.topics[topic_id] = query
 
     def set_topics(self, topics):
         self.topics = topics
