@@ -43,9 +43,9 @@ class TrecTopics:
     def set_topic(self, topic_id, topic_text):
         self.topics[topic_id] = topic_text
 
-    def printfile(self, filename="output.xml", outputdir=None, debug=True):
+    def printfile(self, filename="output.xml", fileformat="terrier", outputdir=None, debug=True):
         """
-            This function writes out the topics to a file.
+            Writes out the topics to a file.
             After one runs this method, TrecTopics.outputfile is available with the
             filepath to the created file.
         """
@@ -56,14 +56,25 @@ class TrecTopics:
         if debug == True:
             print "Writing topics to %s" % (self.outputfile)
 
-        # Creates file object
-        root = etree.Element('topics')
-        for qid, text in sorted(self.topics.iteritems(), key=lambda x:x[0]):
-            topic = etree.SubElement(root, 'top')
-            tid = etree.SubElement(topic, 'num')
-            tid.text = str(qid)
-            ttext = etree.SubElement(topic, 'title')
-            ttext.text = text
+        if fileformat == "terrier":
+            # Creates file object
+            root = etree.Element('topics')
+            for qid, text in sorted(self.topics.iteritems(), key=lambda x:x[0]):
+                topic = etree.SubElement(root, 'top')
+                tid = etree.SubElement(topic, 'num')
+                tid.text = str(qid)
+                ttext = etree.SubElement(topic, 'title')
+                ttext.text = text
+        elif fileformat == "indri":
+            root = etree.Element('parameters')
+            trecformat = etree.SubElement(root, 'trecFormat')
+            trecformat.text = "true"
+            for qid, text in sorted(self.topics.iteritems(), key=lambda x:x[0]):
+                topic = etree.SubElement(root, 'query')
+                tid = etree.SubElement(topic, 'id')
+                tid.text = str(qid)
+                ttext = etree.SubElement(topic, 'text')
+                ttext.text = "#combine( " + text + " )"
 
         f = open(self.outputfile, "w")
         f.writelines(etree.tostring(root, pretty_print=True))
