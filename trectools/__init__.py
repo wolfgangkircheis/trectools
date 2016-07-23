@@ -6,7 +6,8 @@ from .trec_run import TrecRun
 from .trec_pool import TrecPool
 from .trec_topics import TrecTopics
 from .trec_terrier import TrecTerrier
+from .trec_indri import TrecIndri
 
 
-__all__ = ["TrecRes", "TrecQrel", "TrecRun", "TrecPool", "TrecTopics", "TrecTerrier"]
+__all__ = ["TrecRes", "TrecQrel", "TrecRun", "TrecPool", "TrecTopics", "TrecTerrier", "TrecIndri"]
 
