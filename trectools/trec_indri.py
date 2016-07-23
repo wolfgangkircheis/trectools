@@ -22,7 +22,7 @@ class TrecIndri:
         elif result_file is not None:
             outpath = result_file
 
-        cmd = "%s %s -index=%s -trecFormat=true " % (self.bin_path, topics, index, outpath)
+        cmd = "%s %s -index=%s -trecFormat=true " % (self.bin_path, topics, index)
 
         # Specify number of documents to retrieve
         cmd += " -count=%d " % (ndocs)
@@ -38,6 +38,8 @@ class TrecIndri:
 
         if showoutput == False:
             cmd += (" > %s 2> %s" % (os.devnull, os.devnull))
+        else:
+            cmd += " > %s " % (outpath)
 
         if debug:
             print "Running: %s " % (cmd)
