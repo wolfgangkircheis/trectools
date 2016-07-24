@@ -3,6 +3,7 @@ from trectools import TrecPool, TrecRun
 
 # Standard libraries
 import string
+import re
 
 # TODO: use logging properly
 import logging
@@ -13,7 +14,8 @@ import pandas as pd
 from scipy import stats
 
 def remove_punctuation(text):
-    return text.translate(None, string.punctuation)
+    t = re.sub('[' + re.escape(''.join(string.punctuation)) + ']', ' ', text)
+    return re.sub(' +',' ',t)
 
 def check_fleish_kappa(tuple_of_judgements):
     items = set()
