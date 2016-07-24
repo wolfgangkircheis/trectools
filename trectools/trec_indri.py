@@ -10,7 +10,7 @@ class TrecIndri:
     def __init__(self, bin_path):
         self.bin_path = bin_path
 
-    def run(self, index, topics, model="LM", server=None, stopper=None, result_dir=None, result_file="trec_indri.run", ndocs=1000, qexp=False, expTerms=5, expDocs=3, showoutput=False, debug=True):
+    def run(self, index, topics, model="LM", server=None, stopper=None, result_dir=None, result_file="trec_indri.run", ndocs=1000, qexp=False, expTerms=5, expDocs=3, showerrors=True, debug=True, queryOffset=1):
 
         if result_dir is None:
             # Current dir is used if result_dir is not set
@@ -22,7 +22,7 @@ class TrecIndri:
         elif result_file is not None:
             outpath = result_file
 
-        cmd = "%s %s -index=%s -trecFormat=true " % (self.bin_path, topics, index)
+        cmd = "%s %s -index=%s -trecFormat=true -queryOffset=%d " % (self.bin_path, topics, index, queryOffset)
 
         # Specify number of documents to retrieve
         cmd += " -count=%d " % (ndocs)
@@ -36,10 +36,10 @@ class TrecIndri:
         if qexp == True:
             cmd += " -fbDocs=%d -fbTerms=%d " % (expTerms, expDocs)
 
-        if showoutput == False:
-            cmd += (" > %s 2> %s" % (os.devnull, os.devnull))
+        if showerrors == True:
+            cmd += (" > %s " % (outpath))
         else:
-            cmd += " > %s " % (outpath)
+            cmd += (" 2> %s > %s "  % (os.devnull, outpath))
 
         if debug:
             print "Running: %s " % (cmd)

@@ -1,3 +1,4 @@
+from trectools.misc import remove_punctuation
 from lxml import etree
 import codecs
 from bs4 import BeautifulSoup
@@ -69,12 +70,13 @@ class TrecTopics:
             root = etree.Element('parameters')
             trecformat = etree.SubElement(root, 'trecFormat')
             trecformat.text = "true"
-            for qid, text in sorted(self.topics.iteritems(), key=lambda x:x[0]):
+            for qid, text in sorted(self.topics.iteritems(), key=lambda x:int(x[0])):
                 topic = etree.SubElement(root, 'query')
                 tid = etree.SubElement(topic, 'id')
                 tid.text = str(qid)
                 ttext = etree.SubElement(topic, 'text')
-                ttext.text = "#combine( " + text + " )"
+                cleaned_text = remove_punctuation(text)
+                ttext.text = "#combine( " + cleaned_text + " )"
 
         f = open(self.outputfile, "w")
         f.writelines(etree.tostring(root, pretty_print=True))
