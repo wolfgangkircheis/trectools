@@ -10,6 +10,16 @@ class TrecIndri:
     def __init__(self, bin_path):
         self.bin_path = bin_path
 
+    def queryclarity(self, query, index):
+        cmd = "%s/clarity -query='%s' -index=%s 2> %s | head -n1 | cut -f2 -d'=' | cut -d' ' -f3 " % (self.bin_path,query,index,os.devnull)
+        p = sarge.run(cmd, stdout=sarge.Capture())
+        try:
+            f = float(p.stdout.text)
+            return f
+        except Exception as e:
+            print 'Query Clarity exception: %s' % (e)
+            return 0.0
+
     def run(self, index, topics, model="LM", server=None, stopper=None, result_dir=None, result_file="trec_indri.run", ndocs=1000, qexp=False, expTerms=5, expDocs=3, showerrors=True, debug=True, queryOffset=1):
 
         if result_dir is None:
@@ -22,7 +32,7 @@ class TrecIndri:
         elif result_file is not None:
             outpath = result_file
 
-        cmd = "%s %s -index=%s -trecFormat=true -queryOffset=%d " % (self.bin_path, topics, index, queryOffset)
+        cmd = "%s/IndriRunQuery %s -index=%s -trecFormat=true -queryOffset=%d " % (self.bin_path, topics, index, queryOffset)
 
         # Specify number of documents to retrieve
         cmd += " -count=%d " % (ndocs)
