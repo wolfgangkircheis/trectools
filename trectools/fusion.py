@@ -1,5 +1,80 @@
 
 import sys
+import pandas as pd
+import numpy as np
+from sklearn.neighbors import NearestNeighbors
+
+def combos(trec_runs, strategy="sum", output=sys.stdout, max_docs=1000):
+    """
+        strategy: "sum", "max", "min", "anz", "mnz", "med"
+    """
+    dfs = []
+    for t in trec_runs:
+        dfs.append(t.run_data)
+
+    # Merge all runs
+    merged = reduce(lambda left,right: pd.merge(left, right, right_on=["query","docid"], left_on=["query","docid"], how="outer",
+        suffixes=("","_")), dfs)
+    merged = merged[["query", "docid", "score", "score_"]]
+
+    # merged.fillna(0.0, inplace=True) <- not filling nan's. Instead, I am using np.nan* functions
+    # TODO: add option to normalize values
+    # TODO: add option to act on the rank of documents instead of their scores
+
+    if strategy == "sum":
+        merge_func = np.nansum
+    elif strategy == "max":
+        merge_func = np.nanmax
+    elif strategy == "min":
+        merge_func = np.nanmin
+    elif strategy == "anz":
+        merge_func = np.nanmean
+    elif strategy == "mnz":
+        def mnz(values):
+            n_valid_entries = np.sum(~np.isnan(values))
+            return np.nansum(values) * n_valid_entries
+        merge_func = mnz
+    elif strategy == "med":
+        merge_func = np.nanmedian
+
+    merged["ans"] = merged[["score", "score_"]].apply(merge_func, raw=True, axis=1)
+    merged.sort_values(["query", "ans"], ascending=[True,False], inplace=True)
+
+    for topic in merged['query'].unique():
+        merged_topic = merged[merged['query'] == topic]
+        for rank, entry in enumerate(merged_topic[["docid","ans"]].head(max_docs).values, start=1):
+            output.write("%s Q0 %s %d %f comb_%s\n" % (str(topic), entry[0], rank, entry[1], strategy))
+
+    return merged
+
+def vector_space_fusion(trec_runs, output=sys.stdout, max_docs=1000):
+
+    dfs = []
+    for t in trec_runs:
+        dfs.append(t.run_data)
+
+    # Merge all runs
+    merged = reduce(lambda left,right: pd.merge(left, right, right_on=["query","docid"], left_on=["query","docid"], how="outer",
+        suffixes=("","_")), dfs)
+    merged = merged[["query", "docid", "score", "score_"]]
+    merged.fillna(0.0, inplace=True)
+
+    topics = trec_runs[0].topics()
+    for topic in topics:
+
+        mtopic = merged[merged["query"] == topic]
+        nbrs = NearestNeighbors(n_neighbors=mtopic.shape[0], algorithm='ball_tree').fit(mtopic[["score","score_"]])
+
+        pivot = mtopic.ix[mtopic["score"].idxmax()][["score", "score_"]]
+        dists, order = nbrs.kneighbors(pivot.reshape(1, -1))
+
+        docs = mtopic["docid"].values[order[0]]
+        scores = 1.0/ (dists + 0.1)
+
+        # Writes out information for this topic
+        for rank, (d, s) in enumerate(zip(docs, scores[0])[:max_docs], start=1):
+            output.write("%s Q0 %s %d %f vector_space_fusion\n" % (str(topic), d, rank, s))
+
 
 def reciprocal_rank_fusion(trec_runs, k=60, max_docs=1000, output=sys.stdout):
     """
@@ -19,7 +94,7 @@ def reciprocal_rank_fusion(trec_runs, k=60, max_docs=1000, output=sys.stdout):
             docs_for_run = r.get_top_documents(topic, n=1000)
 
             for pos, docid in enumerate(docs_for_run, start=1):
-                doc_scores[docid] = doc_scores.get(docid, 0.0)  + 1.0 / (k + pos)
+                doc_scores[docid] = doc_scores.get(docid, 0.0) + 1.0 / (k + pos)
 
         # Writes out information for this topic
         for rank, (docid, score) in enumerate(sorted(doc_scores.iteritems(), key=lambda x:(-x[1],x[0]))[:max_docs], start=1):
@@ -28,6 +103,7 @@ def reciprocal_rank_fusion(trec_runs, k=60, max_docs=1000, output=sys.stdout):
 
 def borda_count(trec_runs):
     print "TODO: BordaCount (Aslam & Montague, 2001)"
+
 
 def svp(trec_runs):
     print "TODO: (Gleich & Lim, 2011)"

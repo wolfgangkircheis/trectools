@@ -60,6 +60,7 @@ class TrecRes:
         return ttest_ind(merged[0], merged[1])
 
     def get_result(self, metric="P_10", query="all"):
+        # TODO: Use get_value -- http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.get_value.html
         if metric not in self.data["metric"].unique():
             print "Metric %s was not found" % (metric)
             return None

@@ -78,7 +78,7 @@ class TrecTopics:
                 cleaned_text = remove_punctuation(text)
                 ttext.text = "#combine( " + cleaned_text + " )"
 
-        f = open(self.outputfile, "w")
+        f = codecs.open(self.outputfile, "w", encoding="utf-8")
         f.writelines(etree.tostring(root, pretty_print=True))
         f.close()
 

@@ -57,6 +57,7 @@ class TrecRun:
     def evaluate_external_script(self, cmd, debug=False):
         if debug:
             print "Running: %s " % (cmd)
+        # TODO: if this command returns an error, I need to deal with it somehow
         sarge.run(cmd).returncode
 
     def evaluate_run(self, a_trec_qrel, outfile=None, printfile=True, debug=False):
@@ -111,7 +112,10 @@ class TrecRun:
             return res
 
     def check_qrel_coverage(self, trecqrel, topX=10):
-
+        """
+            Check the average number of documents that appear in
+            the qrels among the topX documents of each topic.
+        """
         covered = []
         for topic in sorted(self.topics()):
             cov = 0

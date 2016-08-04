@@ -12,6 +12,7 @@ class TrecIndri:
 
     def queryclarity(self, query, index):
         cmd = "%s/clarity -query='%s' -index=%s 2> %s | head -n1 | cut -f2 -d'=' | cut -d' ' -f3 " % (self.bin_path,query,index,os.devnull)
+<<<<<<< HEAD
         p = sarge.run(cmd, stdout=Capture())
         try:
             f = float(p.stdout.text)
@@ -26,6 +27,16 @@ class TrecIndri:
             results[topid] = r
         return results
 
+=======
+        p = sarge.run(cmd, stdout=sarge.Capture())
+        try:
+            f = float(p.stdout.text)
+            return f
+        except Exception as e:
+            print 'Query Clarity exception: %s' % (e)
+            return 0.0
+
+>>>>>>> 0022df2a5f88fac3427cc09362c79181984bf78e
     def run(self, index, topics, model="LM", server=None, stopper=None, result_dir=None, result_file="trec_indri.run", ndocs=1000, qexp=False, expTerms=5, expDocs=3, showerrors=True, debug=True, queryOffset=1):
 
         if result_dir is None:
