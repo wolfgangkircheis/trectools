@@ -44,6 +44,13 @@ class TrecTopics:
     def set_topic(self, topic_id, topic_text):
         self.topics[topic_id] = topic_text
 
+    def clean_topics(self):
+        result = {}
+        for topid, text in self.topics.iteritems():
+            cleaned_text = remove_punctuation(text)
+            result[topid] = cleaned_text
+        self.topics = result
+
     def printfile(self, filename="output.xml", fileformat="terrier", outputdir=None, debug=True):
         """
             Writes out the topics to a file.
@@ -78,7 +85,7 @@ class TrecTopics:
                 cleaned_text = remove_punctuation(text)
                 ttext.text = "#combine( " + cleaned_text + " )"
 
-        f = codecs.open(self.outputfile, "w", encoding="utf-8")
+        f = open(self.outputfile, "w")
         f.writelines(etree.tostring(root, pretty_print=True))
         f.close()
 
