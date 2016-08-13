@@ -14,9 +14,23 @@ def combos(trec_runs, strategy="sum", output=sys.stdout, max_docs=1000):
         dfs.append(t.run_data)
 
     # Merge all runs
+    """
     merged = reduce(lambda left,right: pd.merge(left, right, right_on=["query","docid"], left_on=["query","docid"], how="outer",
         suffixes=("","_")), dfs)
     merged = merged[["query", "docid", "score", "score_"]]
+    """
+
+    if len(dfs) < 2:
+        return
+    merged = pd.merge(dfs[0], dfs[1], right_on =["query", "docid"] , left_on=["query", "docid"] , how = "outer", suffixes=("", "_"))
+    merged = merged[["query", "q0", "docid", "score", "score_"]]
+
+    for d in dfs[2:]:
+        merged = pd.merge(merged, d, right_on=["query","docid"], left_on=["query","docid"], how="outer", suffixes=("","_"))
+        merged = merged[["query", "q0", "docid", "score", "score_"]]
+
+    #merged["query"] = merged["query"].astype(str).apply(lambda x:x.strip())
+    #return merged
 
     # merged.fillna(0.0, inplace=True) <- not filling nan's. Instead, I am using np.nan* functions
     # TODO: add option to normalize values
