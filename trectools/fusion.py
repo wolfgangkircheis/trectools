@@ -7,6 +7,7 @@ from sklearn.neighbors import NearestNeighbors
 def combos(trec_runs, strategy="sum", output=sys.stdout, max_docs=1000):
     """
         strategy: "sum", "max", "min", "anz", "mnz", "med"
+        max_docs: can be either a single integer or a dict{qid,value}
     """
     dfs = []
     for t in trec_runs:
@@ -42,8 +43,13 @@ def combos(trec_runs, strategy="sum", output=sys.stdout, max_docs=1000):
 
     for topic in merged['query'].unique():
         merged_topic = merged[merged['query'] == topic]
-        for rank, entry in enumerate(merged_topic[["docid","ans"]].head(max_docs).values, start=1):
-            output.write("%s Q0 %s %d %f comb_%s\n" % (str(topic), entry[0], rank, entry[1], strategy))
+        if type(max_docs) == dict:
+            maxd = max_docs[topic]
+            for rank, entry in enumerate(merged_topic[["docid","ans"]].head(maxd).values, start=1):
+                output.write("%s Q0 %s %d %f comb_%s\n" % (str(topic), entry[0], rank, entry[1], strategy))
+        else:
+            for rank, entry in enumerate(merged_topic[["docid","ans"]].head(max_docs).values, start=1):
+                output.write("%s Q0 %s %d %f comb_%s\n" % (str(topic), entry[0], rank, entry[1], strategy))
 
     return merged
 
