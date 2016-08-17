@@ -77,7 +77,7 @@ class TrecTopics:
             root = etree.Element('parameters')
             trecformat = etree.SubElement(root, 'trecFormat')
             trecformat.text = "true"
-            for qid, text in sorted(self.topics.iteritems(), key=lambda x:int(x[0])):
+            for qid, text in sorted(self.topics.iteritems(), key=lambda x:x[0]):
                 topic = etree.SubElement(root, 'query')
                 tid = etree.SubElement(topic, 'id')
                 tid.text = str(qid)
