@@ -56,6 +56,7 @@ class TrecTopics:
             Writes out the topics to a file.
             After one runs this method, TrecTopics.outputfile is available with the
             filepath to the created file.
+            fileformat: terrier, indri or indribaseline
         """
         if outputdir is None:
             outputdir = os.getcwd()
@@ -73,7 +74,7 @@ class TrecTopics:
                 tid.text = str(qid)
                 ttext = etree.SubElement(topic, 'title')
                 ttext.text = text
-        elif fileformat == "indri":
+        elif fileformat == "indri" or fileformat == "indribaseline":
             root = etree.Element('parameters')
             trecformat = etree.SubElement(root, 'trecFormat')
             trecformat.text = "true"
@@ -83,7 +84,10 @@ class TrecTopics:
                 tid.text = str(qid)
                 ttext = etree.SubElement(topic, 'text')
                 cleaned_text = remove_punctuation(text)
-                ttext.text = "#combine( " + cleaned_text + " )"
+                if fileformat == "indri":
+                    ttext.text = "#combine( " + cleaned_text + " )"
+                elif fileformat == "indribaseline":
+                    ttext.text = cleaned_text
 
         f = open(self.outputfile, "w")
         f.writelines(etree.tostring(root, pretty_print=True))
