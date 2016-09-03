@@ -11,7 +11,7 @@ import logging
 # External libraries
 import numpy as np
 import pandas as pd
-from scipy import stats
+import scipy as sp
 
 def remove_punctuation(text):
     t = re.sub('[' + re.escape(''.join(string.punctuation)) + ']', ' ', text)
@@ -89,8 +89,8 @@ def make_pool_rbp(list_of_runs, topX = 100, p=0.80, strategy="sum"):
     big_df = pd.DataFrame(columns=["query","docid","rbp_value"])
 
     for run in list_of_runs:
-        df = run.run_data
-	# NOTE: Everything is made based on the rank col. It should start by '1'
+        df = run.run_data.copy()
+	# NOTE: Everything is made based on the rank col. It HAS TO start by '1'
         df["rbp_value"] = (1.0-p) * (p) ** (df["rank"]-1)
         # Concatenate all dfs into a single big_df
         big_df = pd.concat((big_df,df[["query","docid","rbp_value"]]))
@@ -189,15 +189,22 @@ def get_correlation(sorted1, sorted2, correlation="kendall"):
         new_rank.append(m[s])
 
     if correlation  == "kendall" or correlation == "kendalltau":
-        return stats.kendalltau(xrange(len(s1)), new_rank)
+        return sp.stats.kendalltau(xrange(len(s1)), new_rank)
     elif correlation  == "pearson" or correlation == "spearmanr":
-        return stats.pearsonr(xrange(len(s1)), new_rank)
+        return sp.stats.pearsonr(xrange(len(s1)), new_rank)
     elif correlation  == "spearman" or correlation == "spearmanr":
-        return stats.spearmanr(xrange(len(s1)), new_rank)
+        return sp.stats.spearmanr(xrange(len(s1)), new_rank)
     elif correlation  == "tauap" or correlation == "kendalltauap" or correlation == "tau_ap":
         return tau_ap(new_rank, range(len(s1)))
     else:
         print "Correlation %s is not implemented yet. Options are: kendall, pearson, spearman, tauap." % (correlation)
         return None
 
+
+def confidence_interval(data, confidence=0.95):
+    a = 1.0*np.array(data)
+    n = len(a)
+    m, se = np.mean(a), sp.stats.sem(a)
+    h = se * sp.stats.t._ppf((1+confidence)/2., n-1)
+    return h
 
