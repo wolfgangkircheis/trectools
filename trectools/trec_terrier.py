@@ -18,8 +18,8 @@ class TrecTerrier:
         cmd = "%s -r -Dtrec.topics=%s -Dtrec.model=%s -Dtrec.results=%s -Dtrec.results.file=%s" % (self.bin_path, topics, model,
                 result_dir, result_file)
 
-        cmd += " -Dmatching.retrieved_set_size=%d " % (ndocs)
-
+        cmd += " -Dmatching.retrieved_set_size=%d -Dtrec.output.format.length=%d " % (ndocs,ndocs)
+        
         if terrierc is not None:
             cmd += " -c %d " % (terrierc)
 
