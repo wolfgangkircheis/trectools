@@ -14,6 +14,7 @@ requirements = [
     "sarge >= 0.1.1",
     "lxml >= 3.6.0",
     "bs4 >= 0.0.0.1",
+    "matplotlib >= 1.5",
 ]
 
 setup(name='trectools',
