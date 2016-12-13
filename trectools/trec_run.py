@@ -77,21 +77,28 @@ class TrecRun:
             sarge.run("rm -f .tmp_res")
             return res
 
-    def evaluate_understandability(self, a_trec_qrel, a_trec_qread, p=0.8, stoprank=10, outfile=None, printfile=True, debug=False):
+    def evaluate_ubire(self, a_trec_qrel, a_trec_other, p=0.8, stoprank=10, outfile=None, extension="ures",
+                            printfile=True, debug=False):
         """
             It is necessary to have ubire.jar set on your classpath to run this function.
         """
+        if not os.path.isfile(os.path.join(os.getcwd(), "ubire.jar")):
+            print "File ubire.jar was not found in the current directory."
+            print "Please move it here (%s) and run this procedure again." % ()
+            return None
+
         if printfile:
             if not outfile:
-                outfile = self.get_full_filename_path() + ".ures"
-            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > %s" % (a_trec_qrel.get_full_filename_path(), a_trec_qread.get_full_filename_path(), p, stoprank, self.get_full_filename_path(), outfile)
+                outfile = self.get_full_filename_path() + "." + extension
+
+            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > %s" % (a_trec_qrel.get_full_filename_path(), a_trec_other.get_full_filename_path(), p, stoprank, self.get_full_filename_path(), outfile)
             self.evaluate_external_script(cmd, debug)
             return TrecRes(outfile)
         else:
-            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > .tmp_ures" % (a_trec_qrel.get_full_filename_path(), a_trec_qread.get_full_filename_path(), p, stoprank, self.get_full_filename_path())
+            cmd = "java -jar ubire.jar -q --qrels-file=%s --qread-file=%s --readability --rbp-p=%f --stoprank=%d --ranking-file=%s > .tmp_ures" % (a_trec_qrel.get_full_filename_path(), a_trec_other.get_full_filename_path(), p, stoprank, self.get_full_filename_path())
             self.evaluate_external_script(cmd, debug)
-            res = TrecRes(".tmp_ures")
-            sarge.run("rm -f .tmp_ures")
+            res = TrecRes(".tmp_ubire")
+            sarge.run("rm -f .tmp_ubire")
             return res
 
     def evaluate_ndcg(self, a_trec_qrel, outfile=None, printfile=True, debug=False):
@@ -113,7 +120,7 @@ class TrecRun:
 
     def check_qrel_coverage(self, trecqrel, topX=10):
         """
-            Check the average number of documents that appear in
+            Check the average number of documents per topic that appears in
             the qrels among the topX documents of each topic.
         """
         covered = []
@@ -125,7 +132,14 @@ class TrecRun:
                 if d in qrels_set:
                     cov += 1
             covered.append(cov)
-        return np.mean(covered)
+        return covered
+
+    def get_mean_coverage(self, trecqrel, topX=10):
+        """
+            Check the average number of documents that appears in
+            the qrels among the topX documents of each topic.
+        """
+        return np.mean(self.check_qrel_coverage(trecqrel, topX))
 
     def check_run_coverage(self, another_run, topX=10, debug=False):
         """
