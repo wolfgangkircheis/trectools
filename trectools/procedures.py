@@ -8,20 +8,18 @@ from trectools import TrecRun
 from trectools import misc
 import os
 
-def plot_system_rank(outfile, trec_runs, trec_qrel, metric):
+def plot_system_rank(outfile, results, metric):
     """
-    """
-    evaluation = evaluate_runs(trec_runs, trec_qrel)
-    results = get_results(evaluation, metric) 
 
+    """
     rcParams.update({'figure.autolayout': True})
-    
-    # Transform data in a pandas df to process it easily 
+
+    # Transform data in a pandas df to process it easily
     df = pd.DataFrame(results, columns=["name","value","ci"])
     df = df.sort_values("value", ascending=False).reset_index(drop=True)
-    
-    # Get data 
-    values = df["value"] 
+
+    # Get data
+    values = df["value"]
     ci = df["ci"]
     teamnames = df["name"]
     X = df.index + 1
@@ -40,6 +38,7 @@ def plot_system_rank(outfile, trec_runs, trec_qrel, metric):
     plt.errorbar(X, values, fmt='o', yerr=ci)
     plt.xticks(X, teamnames, rotation='vertical')
     plt.savefig(outfile)
+    plt.close()
 
 def list_of_runs_from_path(path, suffix="*"):
     runs = []
@@ -54,6 +53,11 @@ def evaluate_runs(trec_runs, trec_qrel):
         results.append(r.evaluate_run(trec_qrel))
     return results
 
+def evaluate_runs_ubire(trec_runs, trec_qrel, trec_qread, extension):
+    results = []
+    for r in trec_runs:
+        results.append(r.evaluate_ubire(trec_qrel, trec_qread, extension=extension))
+    return results
 
 def get_results(trec_ress, metric):
     results = []
@@ -62,8 +66,21 @@ def get_results(trec_ress, metric):
 	m = np.mean(rs)
         ci = misc.confidence_interval(rs, confidence=0.95)
         n = res.get_runid()
-        
+
         results.append((n,m,ci))
     return results
 
+def get_coverage(trec_runs, trec_qrels, topX=10):
+    results = []
+    for r in trec_runs:
+        #n = r.get_runid()
+        n = r.run_data.get_value(0,"system")
+        covs = r.check_qrel_coverage(trec_qrels, topX=topX)
+
+	m = np.mean(covs)
+        ci = misc.confidence_interval(covs, confidence=0.95)
+
+        results.append((n,m,ci))
+
+    return results
 
