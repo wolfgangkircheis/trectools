@@ -84,7 +84,7 @@ class TrecRun:
         """
         if not os.path.isfile(os.path.join(os.getcwd(), "ubire.jar")):
             print "File ubire.jar was not found in the current directory."
-            print "Please move it here (%s) and run this procedure again." % ()
+            print "Please move it here (%s) and run this procedure again." % (os.getcwd())
             return None
 
         if printfile:
