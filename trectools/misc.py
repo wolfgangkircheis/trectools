@@ -48,23 +48,31 @@ def unique_documents(list_of_runs, cutoff=10):
     # of documents that were uniquely provided by this RUN
     pass
 
-def make_pool_from_files(filenames, strategy="topX", topX=10, rbp_strategy="sum", rbp_p=0.80):
+def make_pool_from_files(filenames, strategy="topX", topX=10, rbp_strategy="sum", rbp_p=0.80, rrf_den=60):
     """
         Creates a pool object (TrecPool) from a list of filenames.
         ------
-        strategy = (topX, rbp). Default: topX
+        strategy = (topX, rbp, rrf). Default: topX
+
+        * TOP X options:
         topX = Integer Value. The number of documents per query to make the pool.
+
+        * RBP options:
+        topX = Integer Value. The number of documents per query to make the pool. Default 10.
         rbp_strategy = (max, sum). Only in case strategy=rbp. Default: "sum"
         rbp_p = A float value for RBP's p. Only in case strategy=rbp. Default: 0.80
+
+        * RRF options:
+        rrf_den = value for the Reciprocal Rank Fusion denominator. Default: 60
     """
 
     runs = []
     for fname in filenames:
 	runs.append(TrecRun(fname))
-    return make_pool(runs, strategy, topX=topX, rbp_p=rbp_p, rbp_strategy=rbp_strategy)
+    return make_pool(runs, strategy, topX=topX, rbp_p=rbp_p, rbp_strategy=rbp_strategy, rrf_den=rrf_den)
 
 
-def make_pool(list_of_runs, strategy="topX", topX=10, rbp_strategy="sum", rbp_p=0.80):
+def make_pool(list_of_runs, strategy="topX", topX=10, rbp_strategy="sum", rbp_p=0.80, rrf_den=60):
     """
         Creates a pool object (TrecPool) from a list of runs.
         ------
@@ -78,6 +86,44 @@ def make_pool(list_of_runs, strategy="topX", topX=10, rbp_strategy="sum", rbp_p=
         return make_pool_topX(list_of_runs, cutoff=topX)
     elif strategy == "rbp":
         return make_pool_rbp(list_of_runs, topX=topX, p=rbp_p, strategy=rbp_strategy)
+    elif strategy == "rrf":
+        return make_pool_rrf(list_of_runs, topX=topX, rrf_den=rrf_den)
+
+def make_pool_rrf(list_of_runs, topX=500, rrf_den=60):
+    """
+        topX = Number of documents per query. Default: 500.
+        rrf_den = Value for the Reciprocal Rank Fusion denominator. Default is 60 as in the original paper:
+        Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods. G. V. Cormack. University of Waterloo. Waterloo, Ontario, Canada.
+    """
+
+    big_df = pd.DataFrame(columns=["query","docid","rbp_value"])
+
+    for run in list_of_runs:
+        df = run.run_data.copy()
+	# NOTE: Everything is made based on the rank col. It HAS TO start by '1'
+        df["rrf_value"] = 1.0 / (rrf_den + df["rank"])
+        # Concatenate all dfs into a single big_df
+        big_df = pd.concat((big_df,df[["query","docid","rrf_value"]]))
+
+    # Default startegy is the sum.
+    grouped_by_docid = big_df.groupby(["query","docid"])["rrf_value"].sum().reset_index()
+
+    # Sort documents by rbp value inside each qid group
+    grouped_by_docid.sort_values(by=["query","rrf_value"], ascending=[True,False], inplace=True)
+
+    # Selects only the top X from each query
+    result = grouped_by_docid.groupby("query").head(topX)
+
+    # Transform pandas data into a dictionary
+    pool = {}
+    for row in result[["query", "docid"]].itertuples():
+        q = int(row.query)
+        if q not in pool:
+            pool[q] = set([])
+        pool[q].add(row.docid)
+
+    return TrecPool(pool)
+
 
 def make_pool_rbp(list_of_runs, topX = 100, p=0.80, strategy="sum"):
     """
