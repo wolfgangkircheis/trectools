@@ -8,9 +8,14 @@ from trectools import TrecRun
 from trectools import misc
 import os
 
-def plot_system_rank(outfile, results, metric):
+def plot_system_rank(results, metric, outfile="plot.pdf"):
     """
-
+        retults:
+                the object outputed by get_results(...)
+        metric:
+                the human name of your metric. It will be written in the generated graph.
+        outfile:
+                a name for your plot
     """
     rcParams.update({'figure.autolayout': True})
 
@@ -40,6 +45,11 @@ def plot_system_rank(outfile, results, metric):
     plt.savefig(outfile)
     plt.close()
 
+
+def plot_distribuition():
+    pass
+
+
 def list_of_runs_from_path(path, suffix="*"):
     runs = []
     for r in glob(os.path.join(path, suffix)):
@@ -63,7 +73,7 @@ def get_results(trec_ress, metric):
     results = []
     for res in trec_ress:
         rs = res.get_results_for_metric(metric).values()
-	m = np.mean(rs)
+        m = np.mean(rs)
         ci = misc.confidence_interval(rs, confidence=0.95)
         n = res.get_runid()
 
@@ -74,10 +84,10 @@ def get_coverage(trec_runs, trec_qrels, topX=10):
     results = []
     for r in trec_runs:
         #n = r.get_runid()
-        n = r.run_data.get_value(0,"system")
+        n = r.run_data.get_value(0,"system") # TODO: Replace by at or iat
         covs = r.check_qrel_coverage(trec_qrels, topX=topX)
 
-	m = np.mean(covs)
+        m = np.mean(covs)
         ci = misc.confidence_interval(covs, confidence=0.95)
 
         results.append((n,m,ci))

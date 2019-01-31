@@ -68,7 +68,7 @@ def make_pool_from_files(filenames, strategy="topX", topX=10, rbp_strategy="sum"
 
     runs = []
     for fname in filenames:
-	runs.append(TrecRun(fname))
+        runs.append(TrecRun(fname))
     return make_pool(runs, strategy, topX=topX, rbp_p=rbp_p, rbp_strategy=rbp_strategy, rrf_den=rrf_den)
 
 
@@ -100,7 +100,7 @@ def make_pool_rrf(list_of_runs, topX=500, rrf_den=60):
 
     for run in list_of_runs:
         df = run.run_data.copy()
-	# NOTE: Everything is made based on the rank col. It HAS TO start by '1'
+        # NOTE: Everything is made based on the rank col. It HAS TO start by '1'
         df["rrf_value"] = 1.0 / (rrf_den + df["rank"])
         # Concatenate all dfs into a single big_df
         big_df = pd.concat((big_df,df[["query","docid","rrf_value"]]))
@@ -136,7 +136,7 @@ def make_pool_rbp(list_of_runs, topX = 100, p=0.80, strategy="sum"):
 
     for run in list_of_runs:
         df = run.run_data.copy()
-	# NOTE: Everything is made based on the rank col. It HAS TO start by '1'
+        # NOTE: Everything is made based on the rank col. It HAS TO start by '1'
         df["rbp_value"] = (1.0-p) * (p) ** (df["rank"]-1)
         # Concatenate all dfs into a single big_df
         big_df = pd.concat((big_df,df[["query","docid","rbp_value"]]))
@@ -147,7 +147,7 @@ def make_pool_rbp(list_of_runs, topX = 100, p=0.80, strategy="sum"):
     elif strategy == "max":
         grouped_by_docid = big_df.groupby(["query","docid"])["rbp_value"].max().reset_index()
     else:
-        print "Strategy '%s' does not exist. Options are 'sum' and 'max'" % (strategy)
+        print("Strategy '%s' does not exist. Options are 'sum' and 'max'" % (strategy))
 
     # Sort documents by rbp value inside each qid group
     grouped_by_docid.sort_values(by=["query","rbp_value"], ascending=[True,False], inplace=True)
@@ -223,7 +223,7 @@ def get_correlation(sorted1, sorted2, correlation="kendall"):
         return (2 * p - 1., -1)
 
     if len(sorted1) != len(sorted2):
-        print "ERROR: Arrays must have the same size. Given arrays have size (%d) and (%d)." % (len(sorted1), len(sorted2))
+        print("ERROR: Arrays must have the same size. Given arrays have size (%d) and (%d)." % (len(sorted1), len(sorted2)))
         return np.nan
 
     # Transform a list of names into a list of integers
@@ -243,7 +243,7 @@ def get_correlation(sorted1, sorted2, correlation="kendall"):
     elif correlation  == "tauap" or correlation == "kendalltauap" or correlation == "tau_ap":
         return tau_ap(new_rank, range(len(s1)))
     else:
-        print "Correlation %s is not implemented yet. Options are: kendall, pearson, spearman, tauap." % (correlation)
+        print("Correlation %s is not implemented yet. Options are: kendall, pearson, spearman, tauap." % (correlation))
         return None
 
 

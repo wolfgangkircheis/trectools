@@ -7,7 +7,7 @@ import os
 # External libraries
 import pandas as pd
 
-from scipy.stats import ttest_ind
+from scipy.stats import ttest_rel
 
 
 '''
@@ -35,11 +35,12 @@ class TrecRes:
 
     def read_res(self, filename, result_header=["metric", "query", "value"], double_values=True):
         if len(result_header) != 3:
-            print "ERROR: the header of your file should have size 3. Now it is", len(result_header)
+            print("ERROR: the header of your file should have size 3, but I just read %d colunms." % (len(result_header)))
 
         self.filename = filename
         self.data = pd.read_csv(filename, sep="\s+", names=result_header)
-        self.runid = self.data[self.data["metric"] == 'runid']["value"].get_values()[0]
+        #self.runid = self.data[self.data["metric"] == 'runid']["value"].get_values().at[-1] # TODO: replace by at or iat
+        self.runid = "Anyone"
 
         if double_values:
             self.data = self.data[ self.data["metric"] != 'runid']
@@ -49,22 +50,27 @@ class TrecRes:
         return self.runid
 
     def compare_with(self, another_res, metric="P_10"):
+        """
+            Compare results with results of another run with a t-test.
+
+            Returns the ttest_rel result
+        """
         a = pd.Series(self.get_results_for_metric(metric))
         b = pd.Series(another_res.get_results_for_metric(metric))
         merged = pd.concat((a,b), axis=1)
         if merged.isnull().any().sum() > 0:
             merged = merged.dropna()
-            print "The results do not share the same topics. Evaluating results on %d topics." % (merged.shape[0])
-        return ttest_ind(merged[0], merged[1])
+            print("The results do not share the same topics. Evaluating results on %d topics." % (merged.shape[0]))
+        return ttest_rel(merged[0], merged[1])
 
     def get_result(self, metric="P_10", query="all"):
         # TODO: Use get_value -- http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.get_value.html
         if metric not in self.data["metric"].unique():
-            print "Metric %s was not found" % (metric)
+            print("Metric %s was not found" % (metric))
             return None
         v = self.data[(self.data["metric"] == metric) & (self.data["query"] == query)]["value"]
         if v.shape[0] == 0:
-            print "Could not find any result using metric %s and query %s" % (metric, query)
+            print("Could not find any result using metric %s and query %s" % (metric, query))
             return None
         return v.values[0]
 
@@ -86,6 +92,6 @@ class TrecRes:
         if outputformat == 'csv':
             self.data.pivot("query", "metric", "value").to_csv(outputfilename)
         else:
-            print "TODO: outputformat %s is not yet available" % (outputformat)
+            print("TODO: outputformat %s is not yet available" % (outputformat))
 
 

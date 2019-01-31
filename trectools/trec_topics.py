@@ -25,9 +25,9 @@ class TrecTopics:
 
         """
         # TODO: throw an exception for errors when reading the topics.
-	soup = BeautifulSoup(codecs.open(filename, "r"), "lxml")
+        soup = BeautifulSoup(codecs.open(filename, "r"), "lxml")
 
-	for topic in soup.findAll(topic_tag):
+        for topic in soup.findAll(topic_tag):
             if number_attr:
                 topic_id = topic.get(numberid_tag)
             else:
@@ -35,7 +35,7 @@ class TrecTopics:
 
             query = topic.findNext(querytext_tag).getText()
             if debug:
-                print "Number: %s Query: %s" % (topic_id, query)
+                print("Number: %s Query: %s" % (topic_id, query))
             self.topics[topic_id] = query
 
     def set_topics(self, topics):
@@ -63,7 +63,7 @@ class TrecTopics:
 
         self.outputfile = os.path.join(outputdir, filename)
         if debug == True:
-            print "Writing topics to %s" % (self.outputfile)
+            print("Writing topics to %s" % (self.outputfile))
 
         if fileformat == "terrier":
             # Creates file object

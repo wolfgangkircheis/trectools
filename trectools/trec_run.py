@@ -16,7 +16,7 @@ from trectools import TrecRes
 
 '''
 '''
-class TrecRun:
+class TrecRun(object):
     def __init__(self, filename=None):
         if filename:
             self.read_run(filename)
@@ -33,7 +33,7 @@ class TrecRun:
     def print_subset(self, filename, topics):
         dslice = self.run_data[self.run_data["query"].apply(lambda x: x in set(topics))]
         dslice.sort_values(by=["query","score"], ascending=[True,False]).to_csv(filename, sep=" ", header=False, index=False)
-        print "File %s writen." % (filename)
+        print("File %s writen." % (filename))
 
     def get_full_filename_path(self):
         return os.path.abspath(os.path.expanduser(self.filename))
@@ -49,6 +49,8 @@ class TrecRun:
 
     def read_run(self, filename, run_header=["query", "q0", "docid", "rank", "score", "system"]):
         self.run_data = pd.read_csv(filename, sep="\s+", names=run_header)
+        # Make sure the values are correclty sorted by score
+        self.run_data.sort_values(["query","score"], inplace=True, ascending=[True,False])
         self.filename = filename
 
     def get_top_documents(self, topic, n=10):
@@ -56,9 +58,12 @@ class TrecRun:
 
     def evaluate_external_script(self, cmd, debug=False):
         if debug:
-            print "Running: %s " % (cmd)
+            print("Running: %s " % (cmd))
         # TODO: if this command returns an error, I need to deal with it somehow
         sarge.run(cmd).returncode
+
+    # def evaluate_my_trec_eval(self, q_trec_qrels):
+
 
     def evaluate_run(self, a_trec_qrel, outfile=None, printfile=True, debug=False):
         """
@@ -68,10 +73,12 @@ class TrecRun:
             if not outfile:
                 outfile = self.get_full_filename_path() + ".res"
             cmd = "trec_eval -q %s %s > %s" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path(), outfile)
+            print("Running cmd: %s" % (cmd))
             self.evaluate_external_script(cmd, debug)
             return TrecRes(outfile)
         else:
             cmd = "trec_eval -q %s %s > .tmp_res" % (a_trec_qrel.get_full_filename_path(), self.get_full_filename_path())
+            print("Running cmd: %s" % (cmd))
             self.evaluate_external_script(cmd, debug)
             res = TrecRes(".tmp_res")
             sarge.run("rm -f .tmp_res")
@@ -83,8 +90,8 @@ class TrecRun:
             It is necessary to have ubire.jar set on your classpath to run this function.
         """
         if not os.path.isfile(os.path.join(os.getcwd(), "ubire.jar")):
-            print "File ubire.jar was not found in the current directory."
-            print "Please move it here (%s) and run this procedure again." % (os.getcwd())
+            print("File ubire.jar was not found in the current directory.")
+            print("Please move it here (%s) and run this procedure again." % (os.getcwd()))
             return None
 
         if printfile:
@@ -157,9 +164,9 @@ class TrecRun:
             covs.append( len(docsA.intersection(docsB)) )
 
         if len(covs) == 0:
-            print "ERROR: No topics in common."
+            print("ERROR: No topics in common.")
             return 0.0
 
         if debug:
-            print "Evaluated coverage on %d topics: %.3f " % (len(common_topics), np.mean(covs))
+            print("Evaluated coverage on %d topics: %.3f " % (len(common_topics), np.mean(covs)))
         return np.mean(covs)
