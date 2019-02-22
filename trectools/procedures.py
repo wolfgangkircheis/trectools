@@ -80,7 +80,7 @@ def get_results(trec_ress, metric):
         results.append((n,m,ci))
     return results
 
-def get_coverage(trec_runs, trec_qrels, topX=10):
+def get_pool_coverage(trec_runs, trec_qrels, topX=10):
     results = []
     for r in trec_runs:
         #n = r.get_runid()

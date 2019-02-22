@@ -30,32 +30,43 @@ class TrecRun(object):
         else:
             return "Data file not set yet"
 
-    def print_subset(self, filename, topics):
-        dslice = self.run_data[self.run_data["query"].apply(lambda x: x in set(topics))]
-        dslice.sort_values(by=["query","score"], ascending=[True,False]).to_csv(filename, sep=" ", header=False, index=False)
-        print("File %s writen." % (filename))
-
-    def get_full_filename_path(self):
-        return os.path.abspath(os.path.expanduser(self.filename))
-
-    def get_filename(self):
-        return os.path.basename(self.get_full_filename_path())
-
-    def topics(self):
-        return set(self.run_data["query"].unique())
-
-    def topics_intersection_with(self, another_run):
-        return self.topics().intersection(another_run.topics())
-
     def read_run(self, filename, run_header=["query", "q0", "docid", "rank", "score", "system"]):
         self.run_data = pd.read_csv(filename, sep="\s+", names=run_header)
         # Make sure the values are correclty sorted by score
         self.run_data.sort_values(["query","score"], inplace=True, ascending=[True,False])
         self.filename = filename
 
+    def get_full_filename_path(self):
+        """
+            Returns the full path of the run file.
+        """
+        return os.path.abspath(os.path.expanduser(self.filename))
+
+    def get_filename(self):
+        """
+            Returns only the run file.
+        """
+        return os.path.basename(self.get_full_filename_path())
+
+    def topics(self):
+        """
+            Returns a set with all topics.
+        """
+        return set(self.run_data["query"].unique())
+
+    def topics_intersection_with(self, another_run):
+        """
+            Returns a set with topic from this run that are also in 'another_run'.
+        """
+        return self.topics().intersection(another_run.topics())
+
     def get_top_documents(self, topic, n=10):
+        """
+            Returns the top 'n' documents for a given 'topic'.
+        """
         return list(self.run_data[self.run_data['query'] == topic]["docid"].head(n))
 
+    """
     def evaluate_external_script(self, cmd, debug=False):
         if debug:
             print("Running: %s " % (cmd))
@@ -63,12 +74,10 @@ class TrecRun(object):
         sarge.run(cmd).returncode
 
     # def evaluate_my_trec_eval(self, q_trec_qrels):
-
-
     def evaluate_run(self, a_trec_qrel, outfile=None, printfile=True, debug=False):
-        """
+        ""
             It is necessary to have trec_eval set on your PATH run this function.
-        """
+        ""
         if printfile:
             if not outfile:
                 outfile = self.get_full_filename_path() + ".res"
@@ -86,9 +95,9 @@ class TrecRun(object):
 
     def evaluate_ubire(self, a_trec_qrel, a_trec_other, p=0.8, stoprank=10, outfile=None, extension="ures",
                             printfile=True, debug=False):
-        """
+        ""
             It is necessary to have ubire.jar set on your classpath to run this function.
-        """
+        ""
         if not os.path.isfile(os.path.join(os.getcwd(), "ubire.jar")):
             print("File ubire.jar was not found in the current directory.")
             print("Please move it here (%s) and run this procedure again." % (os.getcwd()))
@@ -109,9 +118,9 @@ class TrecRun(object):
             return res
 
     def evaluate_ndcg(self, a_trec_qrel, outfile=None, printfile=True, debug=False):
-        """
+        ""
             It is necessary to have 'mygdeval.pl' set on your PATH run this function.
-        """
+        ""
         if printfile:
             if not outfile:
                 outfile = self.get_full_filename_path() + ".ndcg_res"
@@ -124,6 +133,9 @@ class TrecRun(object):
             res = TrecRes(".tmp_ndcg_res")
             sarge.run("rm -f .tmp_ndcg_res")
             return res
+    """
+    def evaluate(self, metrics=["P@10", "P@100", "NDCG"]):
+        pass
 
     def check_qrel_coverage(self, trecqrel, topX=10):
         """
@@ -170,3 +182,9 @@ class TrecRun(object):
         if debug:
             print("Evaluated coverage on %d topics: %.3f " % (len(common_topics), np.mean(covs)))
         return np.mean(covs)
+
+    def print_subset(self, filename, topics):
+        dslice = self.run_data[self.run_data["query"].apply(lambda x: x in set(topics))]
+        dslice.sort_values(by=["query","score"], ascending=[True,False]).to_csv(filename, sep=" ", header=False, index=False)
+        print("File %s writen." % (filename))
+
