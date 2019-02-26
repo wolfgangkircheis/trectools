@@ -51,6 +51,9 @@ def combos(trec_runs, strategy="sum", output=sys.stdout, max_docs=1000):
         merge_func = mnz
     elif strategy == "med":
         merge_func = np.nanmedian
+    else:
+        print("Unknown strategy %s. Options are: 'sum', 'max', 'min', 'anz', 'mnz'" % (strategy))
+        return None
 
     merged["ans"] = merged[["score", "score_"]].apply(merge_func, raw=True, axis=1)
     merged.sort_values(["query", "ans"], ascending=[True,False], inplace=True)

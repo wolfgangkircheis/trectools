@@ -20,6 +20,9 @@ class TrecRun(object):
     def __init__(self, filename=None):
         if filename:
             self.read_run(filename)
+        else:
+            self.filename = None
+            self.run_data = None
 
     def __repr__(self):
         return self.__str__()
@@ -30,8 +33,11 @@ class TrecRun(object):
         else:
             return "Data file not set yet"
 
-    def read_run(self, filename, run_header=["query", "q0", "docid", "rank", "score", "system"]):
-        self.run_data = pd.read_csv(filename, sep="\s+", names=run_header)
+    def get_runid(self):
+        return self.run_data["system"][0]
+
+    def read_run(self, filename):
+        self.run_data = pd.read_csv(filename, sep="\s+", names=["query", "q0", "docid", "rank", "score", "system"])
         # Make sure the values are correclty sorted by score
         self.run_data.sort_values(["query","score"], inplace=True, ascending=[True,False])
         self.filename = filename
@@ -65,6 +71,12 @@ class TrecRun(object):
             Returns the top 'n' documents for a given 'topic'.
         """
         return list(self.run_data[self.run_data['query'] == topic]["docid"].head(n))
+
+    def evaluate_run(self, trec_qrel_obj, per_query):
+        from trectools import TrecEval
+        evaluator = TrecEval(self, trec_qrel_obj)
+        result = evaluator.evaluateAll(per_query)
+        return result
 
     """
     def evaluate_external_script(self, cmd, debug=False):

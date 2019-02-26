@@ -17,6 +17,8 @@ class TrecRes:
     def __init__(self, filename=None):
         if filename:
             self.read_res(filename)
+        else:
+            self.filename = None
 
     def __repr__(self):
         return self.__str__()
@@ -74,12 +76,14 @@ class TrecRes:
             return None
         return v.values[0]
 
-    def get_results_for_metric(self, metric="P_10", ignore_all_row=True):
+    def get_results_for_metric(self, metric="P_10"):
         '''
             Get the results in a map<query, value> for a giving metric.
         '''
         data_slice = self.data[self.data["metric"] == metric]
-        if ignore_all_row:
+
+        # We have more than one query, we can ignore the "all" rows
+        if data_slice.shape[0] > 1:
             data_slice = data_slice[data_slice["query"] != "all"]
 
         r = data_slice.to_dict(orient='list')

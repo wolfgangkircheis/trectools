@@ -8,16 +8,16 @@ from trectools import TrecRun
 from trectools import misc
 import os
 
-def plot_system_rank(results, metric, outfile="plot.pdf"):
+def plot_system_rank(results, display_metric, outfile="plot.pdf"):
     """
         retults:
                 the object outputed by get_results(...)
-        metric:
+        display_metric:
                 the human name of your metric. It will be written in the generated graph.
         outfile:
                 a name for your plot
     """
-    rcParams.update({'figure.autolayout': True})
+    #rcParams.update({'figure.autolayout': True})
 
     # Transform data in a pandas df to process it easily
     df = pd.DataFrame(results, columns=["name","value","ci"])
@@ -30,25 +30,21 @@ def plot_system_rank(results, metric, outfile="plot.pdf"):
     X = df.index + 1
 
     # Prepares figure for plotting
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12,6))
     ax = fig.add_subplot(111)
 
     # Small adjustments for plotting
-    if metric == "P_10":
-        metric = "P@10"
-
-    ax.set_ylabel(metric)
+    ax.set_ylabel(display_metric)
     ax.set_xlim(0.5,len(X)+0.5)
 
     plt.errorbar(X, values, fmt='o', yerr=ci)
     plt.xticks(X, teamnames, rotation='vertical')
     plt.savefig(outfile)
-    plt.close()
+    return plt
 
 
 def plot_distribuition():
     pass
-
 
 def list_of_runs_from_path(path, suffix="*"):
     runs = []
@@ -57,10 +53,10 @@ def list_of_runs_from_path(path, suffix="*"):
         runs.append(tr)
     return runs
 
-def evaluate_runs(trec_runs, trec_qrel):
+def evaluate_runs(trec_runs, trec_qrel, per_query):
     results = []
     for r in trec_runs:
-        results.append(r.evaluate_run(trec_qrel))
+        results.append(r.evaluate_run(trec_qrel, per_query))
     return results
 
 def evaluate_runs_ubire(trec_runs, trec_qrel, trec_qread, extension):
@@ -69,7 +65,7 @@ def evaluate_runs_ubire(trec_runs, trec_qrel, trec_qread, extension):
         results.append(r.evaluate_ubire(trec_qrel, trec_qread, extension=extension))
     return results
 
-def get_results(trec_ress, metric):
+def extract_metric_from_results(trec_ress, metric):
     results = []
     for res in trec_ress:
         rs = res.get_results_for_metric(metric).values()

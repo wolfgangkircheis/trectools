@@ -1,4 +1,4 @@
-from trectools import TrecRun
+from trectools import TrecRun, TrecRes
 from scipy.stats import norm
 import pandas as pd
 import numpy as np
@@ -8,8 +8,63 @@ class TrecEval:
         self.run = run
         self.qrels = qrels
 
-    def evaluateAll(self):
-        pass
+    def evaluateAll(self, per_query):
+        run_id = self.run.get_runid()
+
+        if per_query:
+            p10_pq = self.getPrecisionAtDepth(depth=10, per_query=True, trec_eval=True).reset_index()
+            p10_pq["metric"] = "P_10"
+            p10_pq.rename(columns={"P@10":"value"}, inplace=True)
+
+        p10 = self.getPrecisionAtDepth(depth=10, per_query=False, trec_eval=True)
+
+        rows = [
+            {"metric": "runid", "query": "all", "value": run_id},
+            {"metric": "num_q", "query": "all", "value": len(self.run.topics())},
+            {"metric": "P_10", "query": "all", "value": p10},
+        ]
+        # TODO: finish implementing them all.
+        """
+        runid                 	all	indri   X
+        num_q                 	all	50      X
+        num_ret               	all	50000
+        num_rel               	all	8114
+        num_rel_ret           	all	1240
+        map                   	all	0.0300
+        gm_map                	all	0.0093
+        Rprec                 	all	0.0736
+        bpref                 	all	0.1386
+        recip_rank            	all	0.4304
+        iprec_at_recall_0.00  	all	0.4642
+        iprec_at_recall_0.10  	all	0.0942
+        iprec_at_recall_0.20  	all	0.0288
+        iprec_at_recall_0.30  	all	0.0190
+        iprec_at_recall_0.40  	all	0.0128
+        iprec_at_recall_0.50  	all	0.0000
+        iprec_at_recall_0.60  	all	0.0000
+        iprec_at_recall_0.70  	all	0.0000
+        iprec_at_recall_0.80  	all	0.0000
+        iprec_at_recall_0.90  	all	0.0000
+        iprec_at_recall_1.00  	all	0.0000
+        P_5                   	all	0.2840
+        P_10                  	all	0.2500
+        P_15                  	all	0.2347
+        P_20                  	all	0.2200
+        P_30                  	all	0.1900
+        P_100                 	all	0.1100
+        P_200                 	all	0.0752
+        P_500                 	all	0.0408
+        P_1000                	all	0.0248
+        """
+
+        rows = pd.DataFrame(rows)
+        rows = pd.concat((p10_pq, rows), sort=True).reset_index(drop=True)
+
+        res = TrecRes()
+        res.data = rows
+        res.runid = run_id
+
+        return res
 
     def getReturnedDocuments(self):
         pass
