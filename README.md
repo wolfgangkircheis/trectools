@@ -1,17 +1,38 @@
 # TREC TOOLS
 
-A simple toolkit to process TREC files. If you do not know what TREC is, you surely do not need this package.
+TrecTools is an open-source Python library for assisting Information Retrieval (IR) practitioners with TREC-like campaigns. 
 
 ## Installing
-
 ```
 pip install trectools
 ```
 
 ## Background
 
-The aim of this module is to facilitate typical procedures used when analysing data from a TREC/CLEF/NTCIR campaign.
-The main object in TREC campaign is participant retrieval system. A retrieval system is takes as input some information need represented by a query and generates a list of documents that are relevant for that query. This information is represented in a TREC campaign as a participant run, which is a file with the following structure:  
+IR practitioners tasked with activities like building test collections, evaluating systems, or analysing results from empirical experiments commonly have to resort to use a number of different software tools and scripts that each perform an individual functionality – and at times they even have to implement ad-hoc scripts of their own. TrecTools aims to provide a unified environment for performing these common activities.
+
+### Features
+
+TrecTools is implemented in Python using standard data science libraries (NumPy, SciPy, Pandas, and Matplotlib) and using the object-oriented paradigm. 
+Each of the key components of an evaluation campaign is mapped to a class: classes for runs (TrecRun),topics/queries (TrecTopic), assessment pools (TrecPools), relevance assessments (TrecQrel) and the evaluation results (TrecRes). [See file format for each object below](https://github.com/joaopalotti/trec_tools#file-formats).
+Evaluation results can be produced by TrecTools itself using the evaluation metrics implemented in the tool, or be imported from the output file of trec_eval and derivatives. The features that are currently implemented in TrecTools are:
+
+- **Querying IR Systems:** Benchmark runs can be obtained di-rectly from one of the IR toolkits that are integrated in TrecTools. There is support for issuing full-text queries to [Indri](https://www.lemurproject.org/indri/) and [Terrier](http://terrier.org/) toolkits. Future releases will include other toolkits (e.g., [Elastic-search](), [Anserini](https://dl.acm.org/citation.cfm?id=3239571), etc.) and support for specific query languages(Indri’s query language, Boolean queries). See code snipets in [Example 1](https://github.com/joaopalotti/trec_tools#example-1).
+
+- **Pooling Techniques:** The following techniques for assessment pool creation from a runs set are implemented: [Depth@K](https://sigir.org/files/museum/pub-14/pub_14.pdf), [Comb[Min/Max/Med/Sum/ANZ/MNZ]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.100.9316&rep=rep1&type=pdf), [Take@N](https://link.springer.com/chapter/10.1007/978-3-319-56608-5_28), [RRFTake@N](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.150.2291&rep=rep1&type=pdf), [RBPTake@N](https://people.eng.unimelb.edu.au/jzobel/fulltext/acmtois08.pdf). [See Example 2](https://github.com/joaopalotti/trec_tools#example-2).
+
+- **Evaluation Measures:** Currently  implemented  and  verified measures include: Precision at depth K, Recall at depth K, MAP, NDCG, Bpref, [uBpref](http://zuccon.net/publications/sigir2016_L2R_readability.pdf), [RBP]((https://people.eng.unimelb.edu.au/jzobel/fulltext/acmtois08.pdf)), [uRBP](https://link.springer.com/chapter/10.1007/978-3-319-30671-1_21). Implemented in TrecTools is the option to break ties using document score (i.e., similar to trec_eval), or document ranking (i.e., similar to the original implementation of [RBP]( https://people.eng.unimelb.edu.au/ammoffat/abstracts/mz08acmtois.html
+)). Additionally, TrecTools also allows to compute the residual of the evaluation measure and analyse the relative presence of unassessed documents. [See Example 3](https://github.com/joaopalotti/trec_tools#example-3).
+
+- **Correlation and Agreement Analysis:** The Pearson, Spearman, Kendall and τ-ap correlation between system rankings can be computed [(see Example 4)](https://github.com/joaopalotti/trec_tools#example-4). Agreement measures between relevance assessment sets can be obtained with Kappa or Jaccard [(see Example 5)](https://github.com/joaopalotti/trec_tools#example-5).
+
+- **Fusion Techniques.** Runs can be fused using the following techniques: Comb[Max/Min/Sum/Mnz/Anz/Med] - both using the scores and document rankings, RBPFusion, RRFFusion,or BordaCountFusion. Fusion techniques are provided for meta-analysis. [See Example 6](https://github.com/joaopalotti/trec_tools#example-6).
+
+### File Formats
+
+The three main modules found in TrecTools are inspired by the main files created in TREC campaigns: a participant run (TrecRun), a qrel (TrecQrel) e a result file (TrecRes). 
+
+**TrecRun format**
 
 qid Q0 docno rank score tag
 
@@ -30,13 +51,7 @@ Example:
 1 Q0 nhslo3844_12_012182 4 1.72522727817 mySystem  
 1 Q0 nhslo1393_12_003296 5 1.71374426875 mySystem  
 
-Once a campaign ends, the evaluation phase starts.
-Usually, it is impossible to judge every document retrieved by every participant run for every query.
-There is a huge cost, both in terms of money and time, to make judgements.
-Many strategies have been proposed to select which documents to judge.
-Without going into many details, a pool of documents has to be created.
-Once documents in that pool are judged with respect to a query, a file is created containing all these judgements.
-This file is usually called 'qrel' and contains lines like this:
+**TrecQrel format**
 
 qid 0 docno relevance  
 
@@ -54,9 +69,7 @@ Example:
 1	0	arthr0949_12_000945	0  
 1	0	arthr0949_12_000974	1  
 
-Finally, the information retrieval community uses some evaluation metric to quantify how good a participant system is.
-Many of common metrics, such as precision@N, mean average precision, bpref and others, are implemented in a tool called [trec_eval] (http://trec.nist.gov/trec_eval/). Although trec_eval lacks many other important measures (e.g., nDCG or RBP), it provides a consistent format for system result:
-
+**TrecRes format**
 
 label qid value
 
@@ -73,59 +86,222 @@ num_rel_ret             all 1180
 map                     all 0.1323
 gm_map                  all 0.0504
 
-The three main modules found in this package are inspired by the main files created in a TREC campaign: a participant run, a qrel e a result file: TrecRun, TrecQrel, TrecRes. Also, there is a 'misc' module to implement many common operations involving one or more module (such as comparing statistical significance of different runs). See the section below for some examples.
-
 ### Code Examples
 
+#### Example 0
+Code Snippets and toy examples with TrecTools. 
+
 ```python
-> from trectools import TrecRun, TrecQrel, TrecRes, misc
+from trectools import TrecQrel, procedures
 
-> myRun = TrecRun("~/mysystem.run")
-> myRun.topics()
-{1,2,3,4,5,6,7}
+qrels_file = "./qrel/robust03_qrels.txt"
+qrels = TrecQrel(qrels_file)
 
-> myRun.get_top_documents(topic=1,n=2)
-['nhslo3844_12_012186', 'nhslo1393_12_003292']
+# Generates a P@10 graph with all the runs in a directory
+path_to_runs = "./robust03/runs/"
+runs = procedures.list_of_runs_from_path(path_to_runs, "*.gz")
 
-> myQrel = TrecQrel("~/assessor.qrel")
-> myQrel.describe()
-count    2076.000000
-mean        0.268786
-std         0.575825
-min         0.000000
-25%         0.000000
-50%         0.000000
-75%         0.000000
-max         2.000000
-> myQrel.get_number_of(1)
-278
+results = procedures.evaluate_runs(runs, qrels, per_query=True)
+p10 = procedures.extract_metric_from_results(results, "P_10")
+procedures.plot_system_rank(p10, display_metric="P@10")
+# Sample output with one run for each participating team in robust03:
+```
+![](robust03/robust03.jpg)
 
-> myQrel.get_number_of(2)
-140
+#### Example 1
+Code Snippets for manipulating topic formats and querying different IR toolkits (shown here: Terrier and Indri)
 
-> myQrel.check_agreement(myQrel)
-1.0
+```python
+from trectools import TrecTopics, TrecTerrier, TrecIndri
 
-> myRes = myRun.evaluate_run(qrel)
-> myRes.get_result(metric="P_10")
-0.8700
+# Loads some topics from a file (e.g., topics.txt)
+"""
+<topics>
+<topic number="201" type="single">
+<query>amazon raspberry pi</query>
+<description> You have heard quite a lot about cheap computing as being the way of the future,
+including one recent model called a Raspberry Pi. You start thinking about buying one, and wonder how much they cost.
+</description>
+</topic>
+</topics>
+"""
+topics = TrecTopics().read_topics_from_file("topics.txt")
+# Or...load topics from a Python dictionary
+topics = TrecTopics(topics={'201': u'amazon raspberry pi'})
+topics.printfile(fileformat="terrier")
+#<topics>
+# <top>
+# <num>201</num>
+# <title>amazon raspberry pi</title>
+# </top>
+#</topics>
 
-> myRes.get_results_for_metric("P_10")
-{1:0.9000, 2:0.8000, ...} 
+topics.printfile(fileformat="indri")
+#<parameters>
+# <trecFormat>true</trecFormat>
+# <query>
+# <id>201</id>
+# <text>#combine( amazon raspberry pi )</text>
+# </query>
+#</parameters>
 
-> myRun2 = TrecRun("~/mysystem2.run")
+topics.printfile(fileformat="indribaseline")
+#<parameters>
+# <trecFormat>true</trecFormat>
+# <query>
+# <id>201</id>
+# <text>amazon raspberry pi</text>
+# </query>
+#</parameters>
 
-> myRes2 = myRun2.evaluate_run(qrel)
-> myRes.compare_with(myRes2, metric="map")
-Ttest_indResult(statistic=1.2224721254608264, pvalue=0.22486892703278308)
+tt = TrecTerrier(bin_path="<PATH>/terrier/bin/") # where trec_terrier.sh is located
+# Runs PL2 model from Terrier with Query Expansion
+tr = tt.run(index="<PATH>/terrier/var/index", topics="topics.xml.gz", qexp=True,
+model="PL2", result_file="terrier.baseline", expTerms=5, expDocs=3, expModel="Bo1") 
 
-> list_of_results = [myRes, myRes2]
-> misc.sort_systems_by(list_of_results, "P_10")
-[(0.8700, 'myRes1'), (0.8300, 'myRes2')]
+ti = TrecIndri(bin_path="~/<PATH>/indri/bin/") # where IndriRunQuery is located
+ti.run(index="<PATH>/indriindex", topics, model="dirichlet", parameters={"mu":2500}, 
+result_file="trec_indri.run", ndocs=1000, qexp=True, expTerms=5, expDocs=3)
+```
 
-> misc.get_correlation( misc.sort_systems_by(list_of_results, "P_10"), misc.sort_systems_by(list_of_results, "map") )
-KendalltauResult(correlation=0.99999999999999989, pvalue=0.11718509694604401)
+#### Example 2
 
-> misc.get_correlation( misc.sort_systems_by(list_of_results, "P_10"), misc.sort_systems_by(list_of_results, "map"), correlation="tauap" )
-1.0
+Code Snippets for generating and exporting document pools using different pooling strategies.
+
+```python
+from trectools import TrecPool, TrecRun
+
+r1 = TrecRun("./robust03/runs/input.aplrob03a.gz")
+r2 = TrecRun("./robust03/runs/input.UIUC03Rd1.gz")
+
+len(r1.topics()) # 100 topics
+ 
+# Creates document pools with r1 and r2 using different strategies:
+
+# Strategy1: Creates a pool with top 10 documents of each run:
+pool1 = TrecPool.make_pool([r1, r2], strategy="topX", topX=10) # Pool with 1636 unique documents.
+
+# Strategy2: Creates a pool with 2000 documents (20 per topic) using the reciprocal ranking strategy by Gordon, Clake and Buettcher:
+pool2 = TrecPool.make_pool([r1,r2], strategy="rrf", topX=20, rrf_den=60) # Pool with 2000 unique documents.
+
+# Check to see which pool covers better my run r1
+pool1.check_coverage(r1, topX=10) # 10.0
+pool2.check_coverage(r1, topX=10) # 8.35 
+
+# Export documents to be judged using Relevation! visual assessing system
+pool1.export_document_list(filename="mypool.txt", with_format="relevation")
+```
+
+#### Example 3
+
+Code snippets showing case evaluation options available in  TrecTools.
+```python
+from trectools import TrecQrel, TrecRun, TrecEval
+
+# A typical evaluation workflow
+r1 = TrecRun("./robust03/runs/input.aplrob03a.gz")
+r1.topics()[:5] # Shows the first 5 topics: 601, 602, 603, 604, 605
+
+qrels = TrecQrel("./robust03/qrel/robust03_qrels.txt")
+
+te = TrecEval(r1, qrels)
+rbp, residuals = te.getRBP()           # RBP: 0.474, Residuals: 0.001
+p100 = te.getPrecisionAtDepth(100)     # P@100: 0.186
+
+# Check if documents retrieved by the system were judged:
+r1.get_mean_coverage(qrels, topX=10)   # 9.99
+r1.get_mean_coverage(qrels, topX=1000) # 481.390 
+# On average for system 'input.aplrob03a' participating in robust03, 480 documents out of 1000 were judged.
+
+# Loads another run
+r2 = TrecRun("./robust03/runs/input.UIUC03Rd1.gz")
+
+# Check how many documents, on average, in the top 10 of r1 were retrieved in the top 10 of r2
+r1.check_run_coverage(r2, topX=10) # 3.64
+
+# Evaluates r1 and r2 using all implemented evaluation metrics
+result_r1 = r1.evaluate_run(qrels, per_query=True) 
+result_r2 = r2.evaluate_run(qrels, per_query=True)
+
+# Inspect for statistically significant differences between the two runs for  P_10 using two-tailed Student t-test
+pvalue = result_r1.compare_with(result_r2, metric="P_10") # pvalue: 0.0167 
+```
+
+#### Example 4
+
+Code Snippets for obtaining correlation measures from a set of runs.
+```python
+from trectools import misc, TrecRun, TrecQrel, procedures
+
+qrels_file = "./robust03/qrel/robust03_qrels.txt"
+path_to_runs = "./robust03/runs/"
+
+qrels = TrecQrel(qrels_file)
+
+runs = procedures.list_of_runs_from_path(path_to_runs, "*.gz")
+
+results = procedures.evaluate_runs(runs, qrels, per_query=True)
+
+# check the system correlation between P@10 and MAP using Kendall's tau for all systems participating in a campaign
+misc.get_correlation( misc.sort_systems_by(results, "P_10"), 
+                      misc.sort_systems_by(results, "map"), correlation = "kendall") # Correlation: 0.7647
+
+# check the system correlation between P@10 and MAP using Tau's ap for all systems participating in a campaign
+misc.get_correlation( misc.sort_systems_by(results, "P_10"), 
+                      misc.sort_systems_by(results, "map"), correlation = "tauap") # Correlation: 0.77413
+```
+
+#### Example 5
+Code Snippets for obtaining agreement measures from a pair of relevance assessments.
+
+```python
+# Code snippet to check correlation between two sets of relevance assessment (e.g., made by different cohorts - assessments made by medical doctors Vs. crowdsourced assessments)
+from trectools import  TrecQrel
+
+original_qrels_file =  "./robust03/qrel/robust03_qrels.txt"
+# Changed the first 10 assessments from 0 to 1
+modified_qrels_file = "./robust03/qrel/mod_robust03_qrels.txt"
+
+original_qrels = TrecQrel(original_qrels_file)
+modified_qrels = TrecQrel(modified_qrels_file)
+
+# Overall agreement 
+original_qrels.check_agreement(modified_qrels) # 0.99
+# Fleiss' kappa agreement
+original_qrels.check_kappa(modified_qrels) # P0: 1.00, Pe = 0.90
+# Jaccard similarity coefficient
+original_qrels.check_jaccard(modified_qrels) # 0.99
+# 3x3 confusion matrix (labels 0, 1 or 2) 
+original_qrels.check_confusion_matrix(modified_qrels)
+# [[122712     10      0]
+# [     0   5667      0]
+# [     0      0    407]]
+```
+
+#### Example 6
+
+Code Snippets for generating fusing two runs (Reciprocal Rank fusion shown here)
+
+```python
+from trectools import TrecRun, TrecEval, fusion
+
+r1 = TrecRun("./robust03/runs/input.aplrob03a.gz")
+r2 = TrecRun("./robust03/runs/input.UIUC03Rd1.gz")
+
+# Easy way to create new baselines by fusing existing runs:
+fused_run = fusion.reciprocal_rank_fusion([r1,r2])
+TrecEval(r1, qrels).getPrecisionAtDepth(25)          # P@25: 0.3392
+TrecEval(r2, qrels).getPrecisionAtDepth(25)          # P@25: 0.2872
+TrecEval(fused_run, qrels).getPrecisionAtDepth(25)   # P@25: 0.3436
+
+# Save run to disk with all its topics
+fused_run.print_subset("my_fused_run.txt", topics=fused_run.topics())
+```
+
+
+## ToDos
+- [x] Upload examples with a famous Trec campaing (e.g., robust3)
+- [ ] Explain other file formats, such as TrecPool
+
+
 
