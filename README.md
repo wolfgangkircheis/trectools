@@ -2,6 +2,19 @@
 
 TrecTools is an open-source Python library for assisting Information Retrieval (IR) practitioners with TREC-like campaigns. 
 
+If this package helps your research somehow, please reference our paper:
+
+```
+@inproceedings{palotti2019,
+ author = {Palotti, Joao and Scells, Harrisen and Zuccon, Guido},
+ title = {TrecTools: an open-source Python library for Information Retrieval practitioners involved in TREC-like campaigns},
+ series = {SIGIR'19},
+ year = {2019},
+ location = {Paris, France},
+ publisher = {ACM}
+} 
+```
+
 ## Installing
 ```
 pip install trectools
@@ -106,7 +119,7 @@ p10 = procedures.extract_metric_from_results(results, "P_10")
 procedures.plot_system_rank(p10, display_metric="P@10")
 # Sample output with one run for each participating team in robust03:
 ```
-![](robust03/robust03.jpg)
+![](robust03/robust03.png)
 
 #### Example 1
 Code Snippets for manipulating topic formats and querying different IR toolkits (shown here: Terrier and Indri)
