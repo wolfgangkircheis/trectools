@@ -24,7 +24,7 @@ class TrecTerrier:
             cmd += " -c c:%d " % (terrierc)
 
         if qexp == True:
-            cmd += " -q -Dexpansion.terms=%d -Dexpansion.documents=%d -Dtrec.qe.model=%s" % (expTerms, expDocs, expModel)
+            cmd += " -q -Dexpansion.terms=%d -Dexpansion.documents=%d -c qemodel:%s" % (expTerms, expDocs, expModel)
 
         if showoutput == False:
             cmd += (" > %s 2> %s" % (os.devnull, os.devnull))
