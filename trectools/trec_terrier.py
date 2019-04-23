@@ -15,13 +15,13 @@ class TrecTerrier:
             # Current dir is used if result_dir is not set
             result_dir = os.getcwd()
 
-        cmd = "%s -r -Dtrec.topics=%s -Dtrec.model=%s -Dtrec.results=%s -Dtrec.results.file=%s" % (self.bin_path, topics, model,
+        cmd = "%s batchretrieve -t %s -w %s -Dtrec.results=%s -o %s" % (self.bin_path, topics, model,
                 result_dir, result_file)
 
         cmd += " -Dmatching.retrieved_set_size=%d -Dtrec.output.format.length=%d " % (ndocs,ndocs)
 
         if terrierc is not None:
-            cmd += " -c %d " % (terrierc)
+            cmd += " -c c:%d " % (terrierc)
 
         if qexp == True:
             cmd += " -q -Dexpansion.terms=%d -Dexpansion.documents=%d -Dtrec.qe.model=%s" % (expTerms, expDocs, expModel)
@@ -40,7 +40,7 @@ class TrecTerrier:
             print("ERROR with command %s" % (cmd))
             return None
 
-#tt = TrecTerrier(bin_path="/data/palotti/terrier/terrier-4.0-trec-cds/bin/trec_terrier.sh")
-#tr = tt.run(index="/data/palotti/terrier/terrier-4.0-trec-cds/var/index", topics="/data/palotti/trec_cds/metamap/default_summary.xml.gz", qexp=False)
+#tt = TrecTerrier(bin_path="/data/palotti/terrier/terrier-5.1/bin/terrier")
+#tr = tt.run(index="/data/palotti/terrier/terrier-5.1/var/index", topics="/data/palotti/trec_cds/metamap/default_summary.xml.gz", qexp=False)
 
 
