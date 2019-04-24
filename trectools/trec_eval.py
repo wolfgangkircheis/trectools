@@ -1,64 +1,135 @@
-from trectools import TrecRun, TrecRes
+from trectools import TrecRes, TrecRun, TrecQrel
 from scipy.stats import norm
 import pandas as pd
 import numpy as np
 
 class TrecEval:
+
+
     def __init__(self, run, qrels):
+        """
+            TrecEval performs the retrieval system evaluation.
+
+            Params
+            -------
+            run: an object of type TrecRun
+            qrels: an object of type TrecQrel
+
+            Returns
+            --------
+            None
+
+        """
+        if not isinstance(run, TrecRun):
+            raise TypeError('"run" should be a TrecRun object')
+
+        if not isinstance(qrels, TrecQrel):
+            raise TypeError('"qrels" should be a TrecQrel object')
+
         self.run = run
         self.qrels = qrels
 
-    def evaluateAll(self, per_query):
+        self.GMEAN_MIN = .00001 # To have the same behavior as trec_eval
+
+    def getRunId(self):
+        return self.run.get_filename()
+
+    def evaluateAll(self, per_query=False):
+        """
+            Runs all evaluation metrics as the default trec_eval tool.
+
+            Params
+            -------
+            per_query: If True, runs the evaluation per query. Default = False
+
+            Returns
+            --------
+            An TrecRes object
+
+        """
         run_id = self.run.get_runid()
+        results_per_query = []
 
         if per_query:
-            p10_pq = self.getPrecisionAtDepth(depth=10, per_query=True, trec_eval=True).reset_index()
-            p10_pq["metric"] = "P_10"
-            p10_pq.rename(columns={"P@10":"value"}, inplace=True)
 
-        p10 = self.getPrecisionAtDepth(depth=10, per_query=False, trec_eval=True)
+            bpref_pq = self.getBpref(depth=1000, per_query=True, trec_eval=True).reset_index()
+            bpref_pq["metric"] = "bpref"
+            bpref_pq.rename(columns={"Bpref@1000":"value"}, inplace=True)
+            results_per_query.append(bpref_pq)
+
+            for v in [5, 10, 15, 20, 30, 100, 200, 500, 1000]:
+                precision_per_query = self.getPrecision(depth=v, per_query=True, trec_eval=True).reset_index()
+                precision_per_query["metric"] = "P_%d" % (v)
+                precision_per_query.rename(columns={"P@%d" % (v): "value"}, inplace=True)
+                results_per_query.append(precision_per_query)
+
+            map_pq = self.getMAP(depth=1000, per_query=True, trec_eval=True).reset_index()
+            map_pq["metric"] = "map"
+            map_pq.rename(columns={"MAP@1000":"value"}, inplace=True)
+            results_per_query.append(map_pq)
+
+            num_ret = self.getRetrievedDocuments(per_query=True).reset_index()
+            num_ret["metric"] = "num_ret"
+            num_ret.rename(columns={"docid":"value"}, inplace=True)
+            results_per_query.append(num_ret)
+
+            num_rel = self.getRelevantDocuments(per_query=True).reset_index()
+            num_rel["metric"] = "num_rel"
+            num_rel.rename(columns={"relevant_per_query":"value"}, inplace=True)
+            results_per_query.append(num_rel)
+
+            num_rel_ret = self.getRelevantRetrievedDocuments(per_query=True).reset_index()
+            num_rel_ret["metric"] = "num_rel_ret"
+            num_rel_ret.rename(columns={"rel":"value"}, inplace=True)
+            results_per_query.append(num_rel_ret)
+
+            rprec = self.getRPrec(per_query=True).reset_index()
+            rprec["metric"] = "Rprec"
+            rprec.rename(columns={"RPrec@1000":"value"}, inplace=True)
+            results_per_query.append(rprec)
+
+            recip_rank = self.getReciprocalRank(per_query=True).reset_index()
+            recip_rank["metric"] = "recip_rank"
+            recip_rank.rename(columns={"recip_rank@1000":"value"}, inplace=True)
+            results_per_query.append(recip_rank)
+
+        ps = {}
+        for v in [5, 10, 15, 20, 30, 100, 200, 500, 1000]:
+            ps[v] = self.getPrecision(depth=v, per_query=False, trec_eval=True)
+        map_ = self.getMAP(depth=10000, per_query=False, trec_eval=True)
+        gm_map_ = self.getGeometricMAP(depth=10000, trec_eval=True)
+        bpref_ = self.getBpref(depth=1000, per_query=False, trec_eval=True)
+        rprec_ = self.getRPrec(depth=1000, per_query=False, trec_eval=True)
+        recip_rank_ = self.getReciprocalRank(depth=1000, per_query=False, trec_eval=True)
 
         rows = [
             {"metric": "runid", "query": "all", "value": run_id},
+            {"metric": "num_ret", "query": "all", "value": self.getRetrievedDocuments(per_query=False)},
+            {"metric": "num_rel", "query": "all", "value": self.getRelevantDocuments(per_query=False)},
+            {"metric": "num_rel_ret", "query": "all", "value": self.getRelevantRetrievedDocuments(per_query=False)},
             {"metric": "num_q", "query": "all", "value": len(self.run.topics())},
-            {"metric": "P_10", "query": "all", "value": p10},
+            {"metric": "map", "query": "all", "value": map_},
+            {"metric": "gm_map", "query": "all", "value": gm_map_},
+            {"metric": "bpref", "query": "all", "value": bpref_},
+            {"metric": "Rprec", "query": "all", "value": rprec_},
+            {"metric": "recip_rank", "query": "all", "value": recip_rank_},
+            {"metric": "P_5", "query": "all", "value": ps[5]},
+            {"metric": "P_10", "query": "all", "value": ps[10]},
+            {"metric": "P_15", "query": "all", "value": ps[15]},
+            {"metric": "P_20", "query": "all", "value": ps[20]},
+            {"metric": "P_30", "query": "all", "value": ps[30]},
+            {"metric": "P_100", "query": "all", "value": ps[100]},
+            {"metric": "P_200", "query": "all", "value": ps[200]},
+            {"metric": "P_500", "query": "all", "value": ps[500]},
+            {"metric": "P_1000", "query": "all", "value": ps[1000]},
         ]
-        # TODO: finish implementing them all.
-        """
-        runid                 	all	indri   X
-        num_q                 	all	50      X
-        num_ret               	all	50000
-        num_rel               	all	8114
-        num_rel_ret           	all	1240
-        map                   	all	0.0300
-        gm_map                	all	0.0093
-        Rprec                 	all	0.0736
-        bpref                 	all	0.1386
-        recip_rank            	all	0.4304
-        iprec_at_recall_0.00  	all	0.4642
-        iprec_at_recall_0.10  	all	0.0942
-        iprec_at_recall_0.20  	all	0.0288
-        iprec_at_recall_0.30  	all	0.0190
-        iprec_at_recall_0.40  	all	0.0128
-        iprec_at_recall_0.50  	all	0.0000
-        iprec_at_recall_0.60  	all	0.0000
-        iprec_at_recall_0.70  	all	0.0000
-        iprec_at_recall_0.80  	all	0.0000
-        iprec_at_recall_0.90  	all	0.0000
-        iprec_at_recall_1.00  	all	0.0000
-        P_5                   	all	0.2840
-        P_10                  	all	0.2500
-        P_15                  	all	0.2347
-        P_20                  	all	0.2200
-        P_30                  	all	0.1900
-        P_100                 	all	0.1100
-        P_200                 	all	0.0752
-        P_500                 	all	0.0408
-        P_1000                	all	0.0248
-        """
+
+        # TODO: iprec_at_recall_LEVEL is missing from the default trec_eval metrics
 
         rows = pd.DataFrame(rows)
-        rows = pd.concat((p10_pq, rows), sort=True).reset_index(drop=True)
+        if len(results_per_query) > 0:
+            results_per_query = pd.concat(results_per_query)
+            rows = pd.concat((results_per_query, rows), sort=True).reset_index(drop=True)
 
         res = TrecRes()
         res.data = rows
@@ -66,17 +137,71 @@ class TrecEval:
 
         return res
 
-    def getReturnedDocuments(self):
-        pass
+    def getRetrievedDocuments(self, per_query=False):
+        """
+            Returns the number retrieved documents
 
-    def getRelevantDocuments(self):
-        pass
+            Params
+            -------
+            per_query: If True, runs the evaluation per query. Default = False
 
-    def getRunId(self):
-        return self.run.get_filename()
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, num_retrieved_docs)
+            else: returns the total number of retrieved documents for all queries.
+
+        """
+        retrieved = self.run.run_data.groupby("query")["docid"].count()
+        if per_query:
+            return retrieved
+        return retrieved.sum()
+
+    def getRelevantDocuments(self, per_query=False):
+        """
+            Returns the number retrieved documents.
+
+            Params
+            -------
+            per_query: If True, runs the evaluation per query. Default = False
+
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, nrelevant_per_query)
+            else: returns the total number of relevant documents for all queries.
+
+        """
+        qrels = self.qrels.qrels_data.copy()
+        qrels["relevant_per_query"] = qrels["rel"] > 0
+        total_rel_per_query = qrels.groupby("query")["relevant_per_query"].sum().astype(np.int)
+
+        if per_query:
+            return total_rel_per_query
+        return total_rel_per_query.sum()
+
+    def getRelevantRetrievedDocuments(self, per_query=False):
+        """
+            Returns the number relevant documents among the retrieved ones.
+
+            Params
+            -------
+            per_query: If True, runs the evaluation per query. Default = False
+
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, num_rel_ret_docs)
+            else: returns the total number of relevant retrieved documents for all queries.
+
+        """
+        merged = pd.merge(self.run.run_data[["query","docid"]], self.qrels.qrels_data[["query","docid","rel"]])
+        ## TODO: fix error -- we should not sum the rel as we could have rel > 1
+        result = merged.groupby("query")["rel"].sum()
+        if per_query:
+            return result
+        return result.sum()
+
 
     def getUnjudged(self, depth=10, per_query=False, trec_eval=True):
-        label = "UNJ@%ddepth" % (depth)
+        label = "UNJ@%d" % (depth)
 
         if trec_eval:
             trecformat = self.run.run_data.sort_values(["query", "score", "docid"], ascending=[True,False,False]).reset_index()
@@ -97,9 +222,104 @@ class TrecEval:
             return unjX_per_query
         return (unjX_per_query.sum() / nqueries)[label]
 
+    def getReciprocalRank(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
+        """
+            Calculates the reciprocal rank of the first relevant retrieved document.
+
+            Params
+            -------
+            per_query: If True, runs the evaluation per query. Default = False
+            depth: the evaluation depth. Default = 1000
+            trec_eval: set to True if result should be the same as trec_eval, e.g., sort documents by score first. Default = True.
+            removeUnjudged: set to True if you want to remove the unjudged documents before calculating this metric.
+
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, MAP@X)
+            else: returns a float value representing the MAP@deph.
+
+        """
+
+        label = "recip_rank@%d" % (depth)
+
+        run = self.run.run_data
+        qrels = self.qrels.qrels_data
+
+        # check number of queries
+        nqueries = len(self.qrels.topics())
+
+        if removeUnjudged:
+            onlyjudged = pd.merge(run, qrels[["query","docid","rel"]], how="left")
+            onlyjudged = onlyjudged[~onlyjudged["rel"].isnull()]
+            run = onlyjudged[["query","q0","docid","rank","score","system"]]
+
+        if trec_eval:
+            trecformat = self.run.run_data.sort_values(["query", "score", "docid"], ascending=[True,False,False]).reset_index()
+            topX = trecformat.groupby("query")[["query","docid","score"]].head(depth)
+        else:
+            topX = self.run.run_data.groupby("query")[["query","docid","score"]].head(depth)
+
+        # Make sure that rank position starts by 1
+        topX["rank"] = 1
+        topX["rank"] = topX.groupby("query")["rank"].cumsum()
+
+        relevant_docs = qrels[qrels.rel > 0]
+        selection = pd.merge(topX, relevant_docs[["query","docid","rel"]], how="left")
+        # converting query to category makes it explicit when using groupby.
+        # This way we end up with a group even if no relevant documents are found for a query.
+        selection["query"] = pd.Categorical(selection["query"])
+        selection = selection[~selection["rel"].isnull()].groupby("query").first().copy()
+        selection[label] = 1.0 / selection["rank"]
+        recip_rank_per_query = selection[[label]]
+
+        if per_query:
+            """ This will return a pandas dataframe with ["query", "recip_rank@depth"] values """
+            return recip_rank_per_query
+
+        if recip_rank_per_query.empty:
+            return 0.0
+
+        return (recip_rank_per_query.sum() / nqueries)[label]
+
+    def getGeometricMAP(self, depth=1000, trec_eval=True):
+        """
+            The Geometric Mean Average Precision is the same as measured by MAP (mean average precision) on individual topics,\n
+            but the geometric mean is used on over the results of each topic.
+            Note that as done in the original trec_eval, the Geometric Map is only reported in the summary over all topics, not
+            for individual topics.
+
+            Params
+            -------
+            depth: the evaluation depth. Default = 1000
+            trec_eval: set to True if result should be the same as trec_eval, e.g., sort documents by score first. Default = True.
+
+            Returns
+            --------
+            The Geometric Mean Average Precision for all topics. Topics with MAP = 0 are replaced by MAP = GMEAN_MIN (default = .00001)
+        """
+        from scipy.stats.mstats import gmean
+        maps = self.getMAP(depth=depth, trec_eval=trec_eval, per_query=True)
+        maps = maps.replace(0.0, self.GMEAN_MIN)
+        return gmean(maps)[0]
 
     def getMAP(self, depth=1000, per_query=False, trec_eval=True):
-        label = "MAP@%ddepth" % (depth)
+        """
+            The Mean Average Precision.\n
+
+            Params
+            -------
+            depth: the evaluation depth. Default = 1000
+            per_query: If True, runs the evaluation per query. Default = False
+            trec_eval: set to True if result should be the same as trec_eval, e.g., sort documents by score first. Default = True.
+
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, MAP@X)
+            else: returns a float value representing the MAP@deph.
+        """
+        #ToDo: missing option to remove unjuged documents.
+
+        label = "MAP@%d" % (depth)
 
         # We only care for binary evaluation here:
         relevant_docs = self.qrels.qrels_data[self.qrels.qrels_data.rel > 0].copy()
@@ -133,7 +353,6 @@ class TrecEval:
         map_per_query = map_per_query / nrel_per_query
 
         if per_query:
-            """ This will return a pandas dataframe with ["query", "NDCG"] values """
             return map_per_query
 
         if map_per_query.empty:
@@ -141,8 +360,83 @@ class TrecEval:
 
         return (map_per_query.sum() / nqueries)[label]
 
+
+    def  getRPrec(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
+        """
+            The Precision at R, where R is the number of relevant documents for a topic.
+
+            Params
+            -------
+            depth: the evaluation depth. Default = 1000
+            trec_eval: set to True if result should be the same as trec_eval, e.g., sort documents by score first. Default = True.
+            per_query: If True, runs the evaluation per query. Default = False
+            removeUnjudged: set to True if you want to remove the unjudged documents before calculating this metric.
+
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, RPrec)
+            else: returns a float value representing the RPrec.
+        """
+        label = "RPrec@%d" % (depth)
+
+        run = self.run.run_data
+        qrels = self.qrels.qrels_data
+
+        # check number of queries
+        nqueries = len(self.qrels.topics())
+
+        if removeUnjudged:
+            onlyjudged = pd.merge(run, qrels[["query","docid","rel"]], how="left")
+            onlyjudged = onlyjudged[~onlyjudged["rel"].isnull()]
+            run = onlyjudged[["query","q0","docid","rank","score","system"]]
+
+        if trec_eval:
+            trecformat = self.run.run_data.sort_values(["query", "score", "docid"], ascending=[True,False,False]).reset_index()
+            topX = trecformat.groupby("query")[["query","docid","score"]].head(depth)
+        else:
+            topX = self.run.run_data.groupby("query")[["query","docid","score"]].head(depth)
+
+        # gets the number of relevant documents per query
+        n_relevant_docs = self.getRelevantDocuments(per_query = True)
+
+        # Gets only the top R documents per topic:
+        topX = topX.groupby("query").apply(lambda x: x.head(n_relevant_docs.loc[x.name])).reset_index(drop=True)
+
+        relevant_docs = qrels[qrels.rel > 0]
+        selection = pd.merge(topX, relevant_docs[["query","docid","rel"]], how="left")
+        selection = selection[~selection["rel"].isnull()]
+
+        rprec_per_query = selection.groupby("query")["docid"].count() / n_relevant_docs
+        rprec_per_query.name = label
+        rprec_per_query = rprec_per_query.reset_index().set_index("query")
+
+        if per_query:
+            return rprec_per_query
+
+        if rprec_per_query.empty:
+            return 0.0
+
+        return (rprec_per_query.sum() / nqueries)[label]
+
+
     def getNDCG(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
-        label = "NDCG@%ddepth" % (depth)
+        """
+            Calculates the normalized discounted cumulative gain (NDCG).
+
+            Params
+            -------
+            depth: the evaluation depth. Default = 1000
+            trec_eval: set to True if result should be the same as trec_eval, e.g., sort documents by score first. Default = True.
+            per_query: If True, runs the evaluation per query. Default = False
+            removeUnjudged: set to True if you want to remove the unjudged documents before calculating this metric.
+
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, NDCG@d)
+            else: returns a float value representing the RPrec.
+        """
+
+        label = "NDCG@%d" % (depth)
 
         run = self.run.run_data
         qrels = self.qrels.qrels_data
@@ -192,7 +486,6 @@ class TrecEval:
         ndcg_per_query = dcg_per_query / idcg_per_query
 
         if per_query:
-            """ This will return a pandas dataframe with ["query", "NDCG"] values """
             return ndcg_per_query
 
         if ndcg_per_query.empty:
@@ -201,6 +494,22 @@ class TrecEval:
         return (ndcg_per_query.sum() / nqueries)[label]
 
     def getBpref(self, depth=1000, per_query=False, trec_eval=True):
+        """
+            Calculates the binary preference (BPREF).
+
+            Params
+            -------
+            depth: the evaluation depth. Default = 1000
+            per_query: If True, runs the evaluation per query. Default = False
+            trec_eval: set to True if result should be the same as trec_eval, e.g., sort documents by score first. Default = True.
+
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, NDCG@d)
+            else: returns a float value representing the RPrec.
+
+        """
+
         label = "Bpref@%d" % (depth)
 
         # check number of queries
@@ -255,6 +564,9 @@ class TrecEval:
             other_qrels: the qrels for other dimensions, i.e., understandability or trustworthiness
         """
 
+        if not isinstance(other_qrels, TrecQrel):
+            raise TypeError('"other_qrels" should be a TrecQrel object')
+
         label = "uBpref@%d" % (depth)
 
         # check number of queries
@@ -305,7 +617,23 @@ class TrecEval:
             return ubpref_per_query
         return (ubpref_per_query.sum() / nqueries)[label]
 
-    def getPrecisionAtDepth(self, depth=10, per_query=False, trec_eval=True, removeUnjudged=False):
+    def getPrecision(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
+        """
+            Calculates the binary precision at depth d (P@d).
+
+            Params
+            -------
+            depth: the evaluation depth. Default = 1000
+            per_query: If True, runs the evaluation per query. Default = False
+            trec_eval: set to True if result should be the same as trec_eval, e.g., sort documents by score first. Default = True.
+            removeUnjudged: set to True if you want to remove the unjudged documents before calculating this metric.
+
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, P@d)
+            else: returns a float value representing the RPrec.
+
+        """
         label = "P@%d" % (depth)
 
         # check number of queries
@@ -333,8 +661,25 @@ class TrecEval:
 
     def getRBP(self, p=0.8, depth=1000, per_query=False, binary_topical_relevance=True, average_ties=True, removeUnjudged=False):
         """
+            Calculates the rank-bias precision at depth d (RBP@d) with persistece paramter p.
+
+            Params
+            -------
+            p: persistence parameter. Default = .80
+            binary_topical_relevance: If True, document relevance is binarized. Default = True.
+            average_ties: ToDo --- Missing documentation. Default = True.
+
+            depth: the evaluation depth. Default = 1000
+            per_query: If True, runs the evaluation per query. Default = False
+            removeUnjudged: set to True if you want to remove the unjudged documents before calculating this metric.
+
+            Returns
+            --------
+            if per_query == True: returns a pandas dataframe with two cols (query, RBP(p)@d)
+            else: returns a float value representing the RPrec.
+
         """
-        label = "RBP(%.2f)@%ddepth" % (p, depth)
+        label = "RBP(%.2f)@%d" % (p, depth)
 
         run = self.run.run_data
         qrels = self.qrels.qrels_data
@@ -386,7 +731,6 @@ class TrecEval:
         rbp_res_per_query = residuals[["query", label]].groupby("query").sum()
 
         if per_query:
-            """ This will return a pandas dataframe with ["query", "RBP"] values """
             return rbp_per_query, rbp_res_per_query - rbp_per_query + p**depth
 
         if rbp_per_query.empty:
@@ -408,7 +752,7 @@ class TrecEval:
 
         """
 
-        label = "uRBP(%.2f)@%ddepth" % (p, depth)
+        label = "uRBP(%.2f)@%d" % (p, depth)
 
         # check number of queries
         nqueries = len(self.qrels.topics())
@@ -481,8 +825,10 @@ class TrecEval:
                 * normalization_factor: a value which will be multiplied to the addtional_qrel["rel"] value. Use it to transform a 0-1 scale into a 0-100 (with normalization_factor = 100). Default: 1.0
 
         """
+        if not isinstance(additional_qrel, TrecQrel):
+            raise TypeError('"additional_qrel" should be a TrecQrel object')
 
-        label = "auRBP(%.2f)@%ddepth" % (p, depth)
+        label = "auRBP(%.2f)@%d" % (p, depth)
 
         # Select only topX documents per query
         topX = self.run.run_data.groupby("query")[["query","docid","score"]].head(depth)
@@ -546,5 +892,4 @@ class TrecEval:
             return 0.0
 
         return (rbp_per_query.sum() / nqueries)[label]
-
 
