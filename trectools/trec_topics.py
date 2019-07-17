@@ -46,7 +46,7 @@ class TrecTopics:
 
     def clean_topics(self):
         result = {}
-        for topid, text in self.topics.iteritems():
+        for topid, text in self.topics.items():
             cleaned_text = remove_punctuation(text)
             result[topid] = cleaned_text
         self.topics = result
@@ -68,7 +68,7 @@ class TrecTopics:
         if fileformat == "terrier":
             # Creates file object
             root = etree.Element('topics')
-            for qid, text in sorted(self.topics.iteritems(), key=lambda x:x[0]):
+            for qid, text in sorted(self.topics.items(), key=lambda x:x[0]):
                 topic = etree.SubElement(root, 'top')
                 tid = etree.SubElement(topic, 'num')
                 tid.text = str(qid)
@@ -78,7 +78,7 @@ class TrecTopics:
             root = etree.Element('parameters')
             trecformat = etree.SubElement(root, 'trecFormat')
             trecformat.text = "true"
-            for qid, text in sorted(self.topics.iteritems(), key=lambda x:x[0]):
+            for qid, text in sorted(self.topics.items(), key=lambda x:x[0]):
                 topic = etree.SubElement(root, 'query')
                 tid = etree.SubElement(topic, 'id')
                 tid.text = str(qid)

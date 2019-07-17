@@ -51,6 +51,8 @@ def list_of_runs_from_path(path, suffix="*"):
     for r in glob(os.path.join(path, suffix)):
         tr = TrecRun(r)
         runs.append(tr)
+
+    print("Found %s runs in path %s" % (len(runs), path))
     return runs
 
 def evaluate_runs(trec_runs, trec_qrel, per_query):
@@ -68,7 +70,7 @@ def evaluate_runs_ubire(trec_runs, trec_qrel, trec_qread, extension):
 def extract_metric_from_results(trec_ress, metric):
     results = []
     for res in trec_ress:
-        rs = res.get_results_for_metric(metric).values()
+        rs = list(res.get_results_for_metric(metric).values())
         m = np.mean(rs)
         ci = misc.confidence_interval(rs, confidence=0.95)
         n = res.get_runid()

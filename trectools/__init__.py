@@ -7,8 +7,8 @@ from .trec_pool import TrecPool
 from .trec_topics import TrecTopics
 from .trec_terrier import TrecTerrier
 from .trec_indri import TrecIndri
+from .trec_pool_maker import TrecPoolMaker
 from .trec_eval import TrecEval
 
-
-__all__ = ["TrecRes", "TrecQrel", "TrecRun", "TrecPool", "TrecTopics", "TrecTerrier", "TrecIndri", "TrecEval"]
+__all__ = ["TrecRes", "TrecQrel", "TrecRun", "TrecPool", "TrecTopics", "TrecTerrier", "TrecIndri", "TrecEval", "TrecPoolMaker"]
 

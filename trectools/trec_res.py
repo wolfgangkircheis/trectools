@@ -87,7 +87,7 @@ class TrecRes:
             data_slice = data_slice[data_slice["query"] != "all"]
 
         r = data_slice.to_dict(orient='list')
-        return dict(zip(r["query"], r["value"]))
+        return dict(list(zip(r["query"], r["value"])))
 
     def printresults(self, outputfilename, outputformat="csv", perquery=False):
         """

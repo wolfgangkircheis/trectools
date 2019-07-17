@@ -22,7 +22,7 @@ class TrecIndri:
 
     def queryclarity_topics(self, trec_topics, index):
         results = {}
-        for topid, top in trec_topics.topics.iteritems():
+        for topid, top in trec_topics.topics.items():
             r = self.queryclarity(top, index)
             results[topid] = r
         return results

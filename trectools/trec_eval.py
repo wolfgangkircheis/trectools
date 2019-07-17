@@ -361,7 +361,7 @@ class TrecEval:
         return (map_per_query.sum() / nqueries)[label]
 
 
-    def  getRPrec(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
+    def getRPrec(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
         """
             The Precision at R, where R is the number of relevant documents for a topic.
 

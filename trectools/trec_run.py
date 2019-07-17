@@ -58,7 +58,7 @@ class TrecRun(object):
         """
             Returns a set with all topics.
         """
-        return set(self.run_data["query"].unique())
+        return sorted(self.run_data["query"].unique())
 
     def topics_intersection_with(self, another_run):
         """
