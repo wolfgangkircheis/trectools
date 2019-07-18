@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from functools import reduce
+from trectools import TrecRun
 
 def combos(trec_runs, strategy="sum", output=sys.stdout, max_docs=1000):
     """
@@ -110,7 +111,10 @@ def reciprocal_rank_fusion(trec_runs, k=60, max_docs=1000, output=sys.stdout):
             output: a file pointer to write the results. Sys.stdout is the default.
     """
 
+    outputRun = TrecRun()
+    rows = []
     topics = trec_runs[0].topics()
+
 
     for topic in sorted(topics):
         doc_scores = {}
@@ -122,8 +126,14 @@ def reciprocal_rank_fusion(trec_runs, k=60, max_docs=1000, output=sys.stdout):
 
         # Writes out information for this topic
         for rank, (docid, score) in enumerate(sorted(iter(doc_scores.items()), key=lambda x:(-x[1],x[0]))[:max_docs], start=1):
-            output.write("%s Q0 %s %d %f reciprocal_rank_fusion_k=%d\n" % (str(topic), docid, rank, score, k))
+            #output.write("%s Q0 %s %d %f reciprocal_rank_fusion_k=%d\n" % (str(topic), docid, rank, score, k))
+            rows.append((str(topic), 0, docid, rank, score, "reciprocal_rank_fusion_k=%d" % k))
 
+    df = pd.DataFrame(rows)
+    df.columns = ["query", "q0", "docid", "rank", "score", "system"]
+    outputRun.run_data = df.copy()
+
+    return outputRun
 
 def rank_biased_precision_fusion(trec_runs, p=0.80, max_docs=1000, output=sys.stdout):
     """

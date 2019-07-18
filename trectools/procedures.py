@@ -8,7 +8,7 @@ from trectools import TrecRun
 from trectools import misc
 import os
 
-def plot_system_rank(results, display_metric, outfile="plot.pdf"):
+def plot_system_rank(results, display_metric, outfile=None):
     """
         retults:
                 the object outputed by get_results(...)
@@ -39,8 +39,11 @@ def plot_system_rank(results, display_metric, outfile="plot.pdf"):
 
     plt.errorbar(X, values, fmt='o', yerr=ci)
     plt.xticks(X, teamnames, rotation='vertical')
-    plt.savefig(outfile)
-    return plt
+
+    if outfile is not None:
+        plt.savefig(outfile,  bbox_inches='tight')
+
+    return fig
 
 
 def plot_distribuition():
