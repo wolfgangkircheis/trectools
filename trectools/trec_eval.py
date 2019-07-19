@@ -642,7 +642,7 @@ class TrecEval:
         qrels = self.qrels.qrels_data
         run = self.run.run_data
 
-        merged = pd.merge(run, qrels[["query","docid","rel"]], how="left")
+        merged = pd.merge(run[["query", "docid", "score"]], qrels[["query","docid","rel"]], how="left")
 
         if trec_eval:
             merged.sort_values(["query", "score", "docid"], ascending=[True,False,False], inplace=True)
