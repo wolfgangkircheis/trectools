@@ -102,12 +102,13 @@ gm_map                  all 0.0504
 ### Code Examples
 
 #### Example 0
-Code Snippets and toy examples with TrecTools. 
+Code Snippets and toy examples with TrecTools.
+See ipython notebook [here](https://github.com/joaopalotti/trectools/blob/master/examples/Example0_Basic_Functions.ipynb). 
 
 ```python
 from trectools import TrecQrel, procedures
 
-qrels_file = "./qrel/robust03_qrels.txt"
+qrels_file = "./robust03/qrel/robust03_qrels.txt"
 qrels = TrecQrel(qrels_file)
 
 # Generates a P@10 graph with all the runs in a directory
@@ -116,7 +117,8 @@ runs = procedures.list_of_runs_from_path(path_to_runs, "*.gz")
 
 results = procedures.evaluate_runs(runs, qrels, per_query=True)
 p10 = procedures.extract_metric_from_results(results, "P_10")
-procedures.plot_system_rank(p10, display_metric="P@10")
+fig = procedures.plot_system_rank(p10, display_metric="P@10", outfile="plot.pdf")
+fig.savefig("plot.pdf", bbox_inches='tight', dpi=600)
 # Sample output with one run for each participating team in robust03:
 ```
 ![](robust03/robust03.png)
@@ -180,6 +182,7 @@ result_file="trec_indri.run", ndocs=1000, qexp=True, expTerms=5, expDocs=3)
 #### Example 2
 
 Code Snippets for generating and exporting document pools using different pooling strategies.
+See ipython notebook [here](https://github.com/joaopalotti/trectools/blob/master/examples/Example2_Making_Doc_Pools.ipynb).
 
 ```python
 from trectools import TrecPool, TrecRun
@@ -208,6 +211,8 @@ pool1.export_document_list(filename="mypool.txt", with_format="relevation")
 #### Example 3
 
 Code snippets showing case evaluation options available in  TrecTools.
+See ipython notebook [here](https://github.com/joaopalotti/trectools/blob/master/examples/Example3_Comparing_Runs.ipynb).
+
 ```python
 from trectools import TrecQrel, TrecRun, TrecEval
 
@@ -218,13 +223,14 @@ r1.topics()[:5] # Shows the first 5 topics: 601, 602, 603, 604, 605
 qrels = TrecQrel("./robust03/qrel/robust03_qrels.txt")
 
 te = TrecEval(r1, qrels)
-rbp, residuals = te.getRBP()           # RBP: 0.474, Residuals: 0.001
-p100 = te.getPrecisionAtDepth(100)     # P@100: 0.186
+rbp, residuals = te.get_rbp()           # RBP: 0.474, Residuals: 0.001
+p100 = te.get_precision(depth=100)     # P@100: 0.186
 
 # Check if documents retrieved by the system were judged:
-r1.get_mean_coverage(qrels, topX=10)   # 9.99
-r1.get_mean_coverage(qrels, topX=1000) # 481.390 
+cover10 = r1.get_mean_coverage(qrels, topX=10)   # 9.99
+cover1000 = r1.get_mean_coverage(qrels, topX=1000) # 481.390 
 # On average for system 'input.aplrob03a' participating in robust03, 480 documents out of 1000 were judged.
+print("Average number of documents judged among top 10: %.2f, among top 1000: %.2f" % (cover10, cover1000))
 
 # Loads another run
 r2 = TrecRun("./robust03/runs/input.UIUC03Rd1.gz")
@@ -243,6 +249,8 @@ pvalue = result_r1.compare_with(result_r2, metric="P_10") # pvalue: 0.0167
 #### Example 4
 
 Code Snippets for obtaining correlation measures from a set of runs.
+See ipython notebook [here](https://github.com/joaopalotti/trectools/blob/master/examples/Example4_Run_Correlation.ipynb).
+
 ```python
 from trectools import misc, TrecRun, TrecQrel, procedures
 
@@ -266,6 +274,7 @@ misc.get_correlation( misc.sort_systems_by(results, "P_10"),
 
 #### Example 5
 Code Snippets for obtaining agreement measures from a pair of relevance assessments.
+See ipython notebook [here](https://github.com/joaopalotti/trectools/blob/master/examples/Example5_Agreement_QRels.ipynb).
 
 ```python
 # Code snippet to check correlation between two sets of relevance assessment (e.g., made by different cohorts - assessments made by medical doctors Vs. crowdsourced assessments)
@@ -282,8 +291,6 @@ modified_qrels = TrecQrel(modified_qrels_file)
 original_qrels.check_agreement(modified_qrels) # 0.99
 # Fleiss' kappa agreement
 original_qrels.check_kappa(modified_qrels) # P0: 1.00, Pe = 0.90
-# Jaccard similarity coefficient
-original_qrels.check_jaccard(modified_qrels) # 0.99
 # 3x3 confusion matrix (labels 0, 1 or 2) 
 original_qrels.check_confusion_matrix(modified_qrels)
 # [[122712     10      0]
@@ -293,7 +300,8 @@ original_qrels.check_confusion_matrix(modified_qrels)
 
 #### Example 6
 
-Code Snippets for generating fusing two runs (Reciprocal Rank fusion shown here)
+Code Snippets for generating fusing two runs (Reciprocal Rank fusion shown here).
+See ipython notebook [here](https://github.com/joaopalotti/trectools/blob/master/examples/Example6_Fusion_Run.ipynb).
 
 ```python
 from trectools import TrecRun, TrecEval, fusion
@@ -303,9 +311,11 @@ r2 = TrecRun("./robust03/runs/input.UIUC03Rd1.gz")
 
 # Easy way to create new baselines by fusing existing runs:
 fused_run = fusion.reciprocal_rank_fusion([r1,r2])
-TrecEval(r1, qrels).getPrecisionAtDepth(25)          # P@25: 0.3392
-TrecEval(r2, qrels).getPrecisionAtDepth(25)          # P@25: 0.2872
-TrecEval(fused_run, qrels).getPrecisionAtDepth(25)   # P@25: 0.3436
+r1_p25 = TrecEval(r1, qrels).get_precision(depth=25)          # P@25: 0.3392
+r2_p25 = TrecEval(r2, qrels).get_precision(depth=25)          # P@25: 0.2872
+fused_run_p25 = TrecEval(fused_run, qrels).get_precision(depth=25)   # P@25: 0.3436
+
+print("P@25 -- Run 1: %.3f, Run 2: %.3f, Fusion Run: %.3f" % (r1_p25, r2_p25, fused_run_p25))
 
 # Save run to disk with all its topics
 fused_run.print_subset("my_fused_run.txt", topics=fused_run.topics())
