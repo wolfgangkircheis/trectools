@@ -64,7 +64,7 @@ class TrecRun(object):
         """
             Returns a set with topic from this run that are also in 'another_run'.
         """
-        return self.topics().intersection(another_run.topics())
+        return set(self.topics()).intersection(set(another_run.topics()))
 
     def get_top_documents(self, topic, n=10):
         """
