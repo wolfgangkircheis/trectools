@@ -4,6 +4,7 @@ import codecs
 from bs4 import BeautifulSoup
 import os
 
+
 class TrecTopics:
 
     def __init__(self, topics={}):

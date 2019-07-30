@@ -6,6 +6,7 @@ from sklearn.neighbors import NearestNeighbors
 from functools import reduce
 from trectools import TrecRun
 
+
 def combos(trec_runs, strategy="sum", output=sys.stdout, max_docs=1000):
     """
         strategy: "sum", "max", "min", "anz", "mnz", "med"
@@ -31,8 +32,8 @@ def combos(trec_runs, strategy="sum", output=sys.stdout, max_docs=1000):
         merged = pd.merge(merged, d, right_on=["query","docid"], left_on=["query","docid"], how="outer", suffixes=("","_"))
         merged = merged[["query", "q0", "docid", "score", "score_"]]
 
-    #merged["query"] = merged["query"].astype(str).apply(lambda x:x.strip())
-    #return merged
+    # merged["query"] = merged["query"].astype(str).apply(lambda x:x.strip())
+    # return merged
 
     # merged.fillna(0.0, inplace=True) <- not filling nan's. Instead, I am using np.nan* functions
     # TODO: add option to normalize values
@@ -71,6 +72,7 @@ def combos(trec_runs, strategy="sum", output=sys.stdout, max_docs=1000):
                 output.write("%s Q0 %s %d %f comb_%s\n" % (str(topic), entry[0], rank, entry[1], strategy))
 
     return merged
+
 
 def vector_space_fusion(trec_runs, output=sys.stdout, max_docs=1000):
 
@@ -115,7 +117,6 @@ def reciprocal_rank_fusion(trec_runs, k=60, max_docs=1000, output=sys.stdout):
     rows = []
     topics = trec_runs[0].topics()
 
-
     for topic in sorted(topics):
         doc_scores = {}
         for r in trec_runs:
@@ -126,7 +127,7 @@ def reciprocal_rank_fusion(trec_runs, k=60, max_docs=1000, output=sys.stdout):
 
         # Writes out information for this topic
         for rank, (docid, score) in enumerate(sorted(iter(doc_scores.items()), key=lambda x:(-x[1],x[0]))[:max_docs], start=1):
-            #output.write("%s Q0 %s %d %f reciprocal_rank_fusion_k=%d\n" % (str(topic), docid, rank, score, k))
+            # output.write("%s Q0 %s %d %f reciprocal_rank_fusion_k=%d\n" % (str(topic), docid, rank, score, k))
             rows.append((topic, "Q0", docid, rank, score, "reciprocal_rank_fusion_k=%d" % k))
 
     df = pd.DataFrame(rows)
@@ -135,6 +136,7 @@ def reciprocal_rank_fusion(trec_runs, k=60, max_docs=1000, output=sys.stdout):
     outputRun.run_data = df.copy()
 
     return outputRun
+
 
 def rank_biased_precision_fusion(trec_runs, p=0.80, max_docs=1000, output=sys.stdout):
     """
@@ -162,17 +164,14 @@ def rank_biased_precision_fusion(trec_runs, p=0.80, max_docs=1000, output=sys.st
 def borda_count(trec_runs):
     print("TODO: BordaCount (Aslam & Montague, 2001)")
 
+
 def svp(trec_runs):
     print("TODO: (Gleich & Lim, 2011)")
+
 
 def mpm(trec_runs):
     print("TODO: (Volkovs & Zemel, 2012) ---> probably it is not the case.")
 
+
 def plackeettluce(trec_runs):
     print("TODO: PlackettLuce (Guiver & Snelson, 2009)")
-
-
-
-
-
-

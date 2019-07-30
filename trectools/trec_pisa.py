@@ -4,6 +4,7 @@ import os
 
 from trectools import TrecRun
 
+
 class TrecPISA:
 
     def __init__(self, bin_path):
@@ -28,7 +29,6 @@ class TrecPISA:
         elif result_file is not None:
             outpath = result_file
 
-
         self.extract_topics(topics, topic_format)
 
         cmd = "%s/evaluate_queries -t %s -a %s -i %s -w %s --documents %s --terms %s -k %s -q topics.title" % (self.bin_path, index_type, algorithm, index, metadata, documents_vector, terms_vector, ndocs)
@@ -49,7 +49,10 @@ class TrecPISA:
             print("ERROR with command %s" % (cmd))
             return None
 
-# tt = TrecPISA(bin_path="/home/amallia/pisa/build/bin/")
-# tr = tt.run(index="/home/amallia/pisa/build/core18.block_simdbp", metadata="/home/amallia/pisa/build/core18.wand", documents_vector="/home/amallia/pisa/build/core18.fwd.doclex", terms_vector="/home/amallia/pisa/build/core18.fwd.termlex", topics="/home/amallia/pisa/build/topics.core18.txt")
+
+if __name__ == '__main__':
+    pass
+    # tt = TrecPISA(bin_path="/home/amallia/pisa/build/bin/")
+    # tr = tt.run(index="/home/amallia/pisa/build/core18.block_simdbp", metadata="/home/amallia/pisa/build/core18.wand", documents_vector="/home/amallia/pisa/build/core18.fwd.doclex", terms_vector="/home/amallia/pisa/build/core18.fwd.termlex", topics="/home/amallia/pisa/build/topics.core18.txt")
 
 

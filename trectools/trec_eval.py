@@ -3,8 +3,8 @@ from scipy.stats import norm
 import pandas as pd
 import numpy as np
 
-class TrecEval:
 
+class TrecEval:
 
     def __init__(self, run, qrels):
         """
@@ -31,10 +31,10 @@ class TrecEval:
 
         self.GMEAN_MIN = .00001 # To have the same behavior as trec_eval
 
-    def getRunId(self):
+    def get_runid(self):
         return self.run.get_filename()
 
-    def evaluateAll(self, per_query=False):
+    def evaluate_all(self, per_query=False):
         """
             Runs all evaluation metrics as the default trec_eval tool.
 
@@ -52,61 +52,61 @@ class TrecEval:
 
         if per_query:
 
-            bpref_pq = self.getBpref(depth=1000, per_query=True, trec_eval=True).reset_index()
+            bpref_pq = self.get_bpref(depth=1000, per_query=True, trec_eval=True).reset_index()
             bpref_pq["metric"] = "bpref"
             bpref_pq.rename(columns={"Bpref@1000":"value"}, inplace=True)
             results_per_query.append(bpref_pq)
 
             for v in [5, 10, 15, 20, 30, 100, 200, 500, 1000]:
-                precision_per_query = self.getPrecision(depth=v, per_query=True, trec_eval=True).reset_index()
+                precision_per_query = self.get_precision(depth=v, per_query=True, trec_eval=True).reset_index()
                 precision_per_query["metric"] = "P_%d" % (v)
                 precision_per_query.rename(columns={"P@%d" % (v): "value"}, inplace=True)
                 results_per_query.append(precision_per_query)
 
-            map_pq = self.getMAP(depth=1000, per_query=True, trec_eval=True).reset_index()
+            map_pq = self.get_map(depth=1000, per_query=True, trec_eval=True).reset_index()
             map_pq["metric"] = "map"
             map_pq.rename(columns={"MAP@1000":"value"}, inplace=True)
             results_per_query.append(map_pq)
 
-            num_ret = self.getRetrievedDocuments(per_query=True).reset_index()
+            num_ret = self.get_retrieved_documents(per_query=True).reset_index()
             num_ret["metric"] = "num_ret"
             num_ret.rename(columns={"docid":"value"}, inplace=True)
             results_per_query.append(num_ret)
 
-            num_rel = self.getRelevantDocuments(per_query=True).reset_index()
+            num_rel = self.get_relevant_documents(per_query=True).reset_index()
             num_rel["metric"] = "num_rel"
             num_rel.rename(columns={"relevant_per_query":"value"}, inplace=True)
             results_per_query.append(num_rel)
 
-            num_rel_ret = self.getRelevantRetrievedDocuments(per_query=True).reset_index()
+            num_rel_ret = self.get_relevant_retrieved_documents(per_query=True).reset_index()
             num_rel_ret["metric"] = "num_rel_ret"
             num_rel_ret.rename(columns={"rel":"value"}, inplace=True)
             results_per_query.append(num_rel_ret)
 
-            rprec = self.getRPrec(per_query=True).reset_index()
+            rprec = self.get_rprec(per_query=True).reset_index()
             rprec["metric"] = "Rprec"
             rprec.rename(columns={"RPrec@1000":"value"}, inplace=True)
             results_per_query.append(rprec)
 
-            recip_rank = self.getReciprocalRank(per_query=True).reset_index()
+            recip_rank = self.get_reciprocal_rank(per_query=True).reset_index()
             recip_rank["metric"] = "recip_rank"
             recip_rank.rename(columns={"recip_rank@1000":"value"}, inplace=True)
             results_per_query.append(recip_rank)
 
         ps = {}
         for v in [5, 10, 15, 20, 30, 100, 200, 500, 1000]:
-            ps[v] = self.getPrecision(depth=v, per_query=False, trec_eval=True)
-        map_ = self.getMAP(depth=10000, per_query=False, trec_eval=True)
-        gm_map_ = self.getGeometricMAP(depth=10000, trec_eval=True)
-        bpref_ = self.getBpref(depth=1000, per_query=False, trec_eval=True)
-        rprec_ = self.getRPrec(depth=1000, per_query=False, trec_eval=True)
-        recip_rank_ = self.getReciprocalRank(depth=1000, per_query=False, trec_eval=True)
+            ps[v] = self.get_precision(depth=v, per_query=False, trec_eval=True)
+        map_ = self.get_map(depth=10000, per_query=False, trec_eval=True)
+        gm_map_ = self.get_geometric_MAP(depth=10000, trec_eval=True)
+        bpref_ = self.get_bpref(depth=1000, per_query=False, trec_eval=True)
+        rprec_ = self.get_rprec(depth=1000, per_query=False, trec_eval=True)
+        recip_rank_ = self.get_reciprocal_rank(depth=1000, per_query=False, trec_eval=True)
 
         rows = [
             {"metric": "runid", "query": "all", "value": run_id},
-            {"metric": "num_ret", "query": "all", "value": self.getRetrievedDocuments(per_query=False)},
-            {"metric": "num_rel", "query": "all", "value": self.getRelevantDocuments(per_query=False)},
-            {"metric": "num_rel_ret", "query": "all", "value": self.getRelevantRetrievedDocuments(per_query=False)},
+            {"metric": "num_ret", "query": "all", "value": self.get_retrieved_documents(per_query=False)},
+            {"metric": "num_rel", "query": "all", "value": self.get_relevant_documents(per_query=False)},
+            {"metric": "num_rel_ret", "query": "all", "value": self.get_relevant_retrieved_documents(per_query=False)},
             {"metric": "num_q", "query": "all", "value": len(self.run.topics())},
             {"metric": "map", "query": "all", "value": map_},
             {"metric": "gm_map", "query": "all", "value": gm_map_},
@@ -137,7 +137,7 @@ class TrecEval:
 
         return res
 
-    def getRetrievedDocuments(self, per_query=False):
+    def get_retrieved_documents(self, per_query=False):
         """
             Returns the number retrieved documents
 
@@ -156,7 +156,7 @@ class TrecEval:
             return retrieved
         return retrieved.sum()
 
-    def getRelevantDocuments(self, per_query=False):
+    def get_relevant_documents(self, per_query=False):
         """
             Returns the number retrieved documents.
 
@@ -178,7 +178,7 @@ class TrecEval:
             return total_rel_per_query
         return total_rel_per_query.sum()
 
-    def getRelevantRetrievedDocuments(self, per_query=False):
+    def get_relevant_retrieved_documents(self, per_query=False):
         """
             Returns the number relevant documents among the retrieved ones.
 
@@ -199,8 +199,14 @@ class TrecEval:
             return result
         return result.sum()
 
+    def get_unjudged(self, depth=10, per_query=False, trec_eval=True):
+        """
+        :param depth:
+        :param per_query:
+        :param trec_eval:
+        :return:
+        """
 
-    def getUnjudged(self, depth=10, per_query=False, trec_eval=True):
         label = "UNJ@%d" % (depth)
 
         if trec_eval:
@@ -222,7 +228,7 @@ class TrecEval:
             return unjX_per_query
         return (unjX_per_query.sum() / nqueries)[label]
 
-    def getReciprocalRank(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
+    def get_reciprocal_rank(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
         """
             Calculates the reciprocal rank of the first relevant retrieved document.
 
@@ -281,7 +287,7 @@ class TrecEval:
 
         return (recip_rank_per_query.sum() / nqueries)[label]
 
-    def getGeometricMAP(self, depth=1000, trec_eval=True):
+    def get_geometric_map(self, depth=1000, trec_eval=True):
         """
             The Geometric Mean Average Precision is the same as measured by MAP (mean average precision) on individual topics,\n
             but the geometric mean is used on over the results of each topic.
@@ -298,11 +304,12 @@ class TrecEval:
             The Geometric Mean Average Precision for all topics. Topics with MAP = 0 are replaced by MAP = GMEAN_MIN (default = .00001)
         """
         from scipy.stats.mstats import gmean
-        maps = self.getMAP(depth=depth, trec_eval=trec_eval, per_query=True)
+        maps = self.get_map(depth=depth, trec_eval=trec_eval, per_query=True)
         maps = maps.replace(0.0, self.GMEAN_MIN)
         return gmean(maps)[0]
 
-    def getMAP(self, depth=1000, per_query=False, trec_eval=True):
+
+    def get_map(self, depth=1000, per_query=False, trec_eval=True):
         """
             The Mean Average Precision.\n
 
@@ -361,7 +368,7 @@ class TrecEval:
         return (map_per_query.sum() / nqueries)[label]
 
 
-    def getRPrec(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
+    def get_rprec(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
         """
             The Precision at R, where R is the number of relevant documents for a topic.
 
@@ -397,7 +404,7 @@ class TrecEval:
             topX = self.run.run_data.groupby("query")[["query","docid","score"]].head(depth)
 
         # gets the number of relevant documents per query
-        n_relevant_docs = self.getRelevantDocuments(per_query = True)
+        n_relevant_docs = self.get_relevant_documents(per_query = True)
 
         # Gets only the top R documents per topic:
         topX = topX.groupby("query").apply(lambda x: x.head(n_relevant_docs.loc[x.name])).reset_index(drop=True)
@@ -419,7 +426,7 @@ class TrecEval:
         return (rprec_per_query.sum() / nqueries)[label]
 
 
-    def getNDCG(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
+    def get_ndcg(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
         """
             Calculates the normalized discounted cumulative gain (NDCG).
 
@@ -493,7 +500,8 @@ class TrecEval:
 
         return (ndcg_per_query.sum() / nqueries)[label]
 
-    def getBpref(self, depth=1000, per_query=False, trec_eval=True):
+
+    def get_bpref(self, depth=1000, per_query=False, trec_eval=True):
         """
             Calculates the binary preference (BPREF).
 
@@ -559,7 +567,7 @@ class TrecEval:
         return (bpref_per_query.sum() / nqueries)[label]
 
 
-    def getUBpref(self, other_qrels, per_query=False, trec_eval=True, normalization_factor = 1.0, depth=1000):
+    def get_ubpref(self, other_qrels, per_query=False, trec_eval=True, normalization_factor = 1.0, depth=1000):
         """
             other_qrels: the qrels for other dimensions, i.e., understandability or trustworthiness
         """
@@ -617,7 +625,7 @@ class TrecEval:
             return ubpref_per_query
         return (ubpref_per_query.sum() / nqueries)[label]
 
-    def getPrecision(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
+    def get_precision(self, depth=1000, per_query=False, trec_eval=True, removeUnjudged=False):
         """
             Calculates the binary precision at depth d (P@d).
 
@@ -659,7 +667,7 @@ class TrecEval:
             return pX_per_query
         return (pX_per_query.sum() / nqueries)[label]
 
-    def getRBP(self, p=0.8, depth=1000, per_query=False, binary_topical_relevance=True, average_ties=True, removeUnjudged=False):
+    def get_rbp(self, p=0.8, depth=1000, per_query=False, binary_topical_relevance=True, average_ties=True, removeUnjudged=False):
         """
             Calculates the rank-bias precision at depth d (RBP@d) with persistece paramter p.
 
@@ -738,7 +746,7 @@ class TrecEval:
 
         return (rbp_per_query.sum() / nqueries)[label], (rbp_res_per_query.sum() / nqueries)[label]  + p** depth - (rbp_per_query.sum() / nqueries)[label]
 
-    def getURBP(self, additional_qrel, strategy="direct_multiplication", normalization_factor = 1.0, p=0.8, depth=1000,
+    def get_urbp(self, additional_qrel, strategy="direct_multiplication", normalization_factor = 1.0, p=0.8, depth=1000,
             per_query=False, binary_topical_relevance=True, average_ties=True, removeUnjudged=False):
         """
             uRBP is the modification of RBP to cope with other dimentions of relevation.
@@ -810,8 +818,7 @@ class TrecEval:
 
         return (rbp_per_query.sum() / nqueries)[label]
 
-
-    def getAlphaURBP(self, additional_qrel, goals, strategy="direct_multiplication", normalization_factor = 1.0, p=0.8, depth=1000, per_query=False, binary_topical_relevance=True, average_ties=True):
+    def get_alpha_urbp(self, additional_qrel, goals, strategy="direct_multiplication", normalization_factor = 1.0, p=0.8, depth=1000, per_query=False, binary_topical_relevance=True, average_ties=True):
 
         """
             alphaURBP is the modification of uRBP to cope with various profiles defined using alpha.
@@ -892,4 +899,3 @@ class TrecEval:
             return 0.0
 
         return (rbp_per_query.sum() / nqueries)[label]
-

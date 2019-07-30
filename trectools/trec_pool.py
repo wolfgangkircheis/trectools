@@ -6,8 +6,6 @@ import os
 import numpy as np
 
 
-'''
-'''
 class TrecPool:
 
     def __init__(self, pool):
@@ -53,15 +51,14 @@ class TrecPool:
     def minus(self, another_pool, inplace=False):
         if inplace:
             self.operate_pools(another_pool, "minus", inplace)
-        return self.operate_pools(another_pool, "minus", inplace)
+        else:
+            return self.operate_pools(another_pool, "minus", inplace)
 
     def plus(self, another_pool, inplace=False):
         if inplace:
             self.operate_pools(another_pool, "sum", inplace)
-        return self.operate_pools(another_pool, "sum", inplace)
-
-    def check_size_minus(self, another_pool):
-        return self.get_pool_size(self.minus(another_pool))
+        else:
+            return self.operate_pools(another_pool, "sum", inplace)
 
     def export_document_list(self, filename, with_format="relevation"):
         """
@@ -101,4 +98,3 @@ class TrecPool:
                     cov += 1
             covered.append(cov)
         return np.mean(covered)
-

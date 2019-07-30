@@ -3,17 +3,15 @@ import pandas as pd
 from trectools import TrecPool, TrecRun
 
 
-'''
-'''
 class TrecPoolMaker:
 
     def __init__(self):
         pass
 
-    #def __repr__(self):
+    # def __repr__(self):
     #    return self.__str__()
 
-    #def __str__(self):
+    # def __str__(self):
     #    return "Pool with %d topics. Total of %d unique documents."  % (len(self.pool), self.get_total_pool_size())
 
     def make_pool_from_files(self, filenames, strategy="topX", topX=10, rbp_strategy="sum", rbp_p=0.80, rrf_den=60):

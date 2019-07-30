@@ -13,14 +13,16 @@ import numpy as np
 from sklearn import metrics
 from scipy.stats import ttest_ind
 
-'''
-'''
+
 class TrecQrel:
     def __init__(self, filename=None, qrels_header=["query","q0","docid","rel"]):
 
         #TODO: support to check whether the fields match.
         if filename:
             self.read_qrel(filename, qrels_header)
+        else:
+            self.filename = None
+            self.qrels_data = None
 
     def __repr__(self):
         return self.__str__()
@@ -186,7 +188,6 @@ class TrecQrel:
         slice2 = another_qrel.qrels_data[another_qrel.qrels_data["query"] == topic]
 
         return pd.merge(slice1, slice2, on=["query","q0","docid"])
-
 
     def check_agreement(self, another_qrel, topics=None, labels=None):
 

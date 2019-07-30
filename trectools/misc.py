@@ -13,9 +13,11 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 
+
 def remove_punctuation(text):
     t = re.sub('[' + re.escape(''.join(string.punctuation)) + ']', ' ', text)
     return re.sub(' +',' ',t)
+
 
 def check_fleish_kappa(tuple_of_judgements):
     items = set()
@@ -43,10 +45,12 @@ def check_fleish_kappa(tuple_of_judgements):
 
     return kappa
 
+
 def unique_documents(list_of_runs, cutoff=10):
     # TODO: this should return a <RUN, [documents] >, in which for each RUN, we have a list
     # of documents that were uniquely provided by this RUN
     pass
+
 
 def sort_systems_by(list_trec_res, metric="map"):
     r = []

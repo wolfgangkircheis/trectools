@@ -56,7 +56,7 @@ class TrecRun(object):
 
     def topics(self):
         """
-            Returns a set with all topics.
+            Returns a list with all topics.
         """
         return sorted(self.run_data["query"].unique())
 
@@ -75,7 +75,7 @@ class TrecRun(object):
     def evaluate_run(self, trec_qrel_obj, per_query):
         from trectools import TrecEval
         evaluator = TrecEval(self, trec_qrel_obj)
-        result = evaluator.evaluateAll(per_query)
+        result = evaluator.evaluate_all(per_query)
         return result
 
     """
@@ -199,4 +199,3 @@ class TrecRun(object):
         dslice = self.run_data[self.run_data["query"].apply(lambda x: x in set(topics))]
         dslice.sort_values(by=["query","score"], ascending=[True,False]).to_csv(filename, sep=" ", header=False, index=False)
         print("File %s writen." % (filename))
-

@@ -4,6 +4,7 @@ import os
 
 from trectools import TrecRun
 
+
 class TrecTerrier:
 
     def __init__(self, bin_path):
@@ -40,7 +41,10 @@ class TrecTerrier:
             print("ERROR with command %s" % (cmd))
             return None
 
-#tt = TrecTerrier(bin_path="/data/palotti/terrier/terrier-5.1/bin/terrier")
-#tr = tt.run(index="/data/palotti/terrier/terrier-5.1/var/index", topics="/data/palotti/trec_cds/metamap/default_summary.xml.gz", qexp=False)
+
+if __name__ == '__main__':
+    pass
+    #tt = TrecTerrier(bin_path="/data/palotti/terrier/terrier-5.1/bin/terrier")
+    #tr = tt.run(index="/data/palotti/terrier/terrier-5.1/var/index", topics="/data/palotti/trec_cds/metamap/default_summary.xml.gz", qexp=False)
 
 

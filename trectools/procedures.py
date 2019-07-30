@@ -8,6 +8,7 @@ from trectools import TrecRun
 from trectools import misc
 import os
 
+
 def plot_system_rank(results, display_metric, outfile=None):
     """
         retults:
@@ -49,6 +50,7 @@ def plot_system_rank(results, display_metric, outfile=None):
 def plot_distribuition():
     pass
 
+
 def list_of_runs_from_path(path, suffix="*"):
     runs = []
     for r in glob(os.path.join(path, suffix)):
@@ -58,17 +60,20 @@ def list_of_runs_from_path(path, suffix="*"):
     print("Found %s runs in path %s" % (len(runs), path))
     return runs
 
+
 def evaluate_runs(trec_runs, trec_qrel, per_query):
     results = []
     for r in trec_runs:
         results.append(r.evaluate_run(trec_qrel, per_query))
     return results
 
+
 def evaluate_runs_ubire(trec_runs, trec_qrel, trec_qread, extension):
     results = []
     for r in trec_runs:
         results.append(r.evaluate_ubire(trec_qrel, trec_qread, extension=extension))
     return results
+
 
 def extract_metric_from_results(trec_ress, metric):
     results = []
@@ -81,10 +86,11 @@ def extract_metric_from_results(trec_ress, metric):
         results.append((n,m,ci))
     return results
 
+
 def get_pool_coverage(trec_runs, trec_qrels, topX=10):
     results = []
     for r in trec_runs:
-        #n = r.get_runid()
+        # n = r.get_runid()
         n = r.run_data.get_value(0,"system") # TODO: Replace by at or iat
         covs = r.check_qrel_coverage(trec_qrels, topX=topX)
 
@@ -94,4 +100,3 @@ def get_pool_coverage(trec_runs, trec_qrels, topX=10):
         results.append((n,m,ci))
 
     return results
-

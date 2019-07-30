@@ -4,13 +4,13 @@ import os
 
 from trectools import TrecRun
 
-#TODO: sourceforce was offline when I wrote this code. I need to get to the docs to check regarinding the baselines and how to specify them.
+
 class TrecIndri:
 
     def __init__(self, bin_path):
         self.bin_path = bin_path
 
-    def queryclarity(self, query, index):
+    def query_clarity(self, query, index):
         cmd = "%s/clarity -query='%s' -index=%s 2> %s | head -n1 | cut -f2 -d'=' | cut -d' ' -f3 " % (self.bin_path,query,index,os.devnull)
         p = sarge.run(cmd, stdout=sarge.Capture())
         try:
@@ -20,7 +20,7 @@ class TrecIndri:
             print('Query Clarity exception: %s' % (e))
             return 0.0
 
-    def queryclarity_topics(self, trec_topics, index):
+    def query_clarity_topics(self, trec_topics, index):
         results = {}
         for topid, top in trec_topics.topics.items():
             r = self.queryclarity(top, index)
@@ -43,7 +43,6 @@ class TrecIndri:
 
         # Specify number of documents to retrieve
         cmd += " -count=%d " % (ndocs)
-
 
         if model == "dirichlet":
             if "mu" not in parameters:
@@ -104,7 +103,8 @@ class TrecIndri:
             print("ERROR with command %s" % (cmd))
             return None
 
-#tt = TrecIndri(bin_path="/data/palotti/terrier/terrier-4.0-trec-cds/bin/trec_terrier.sh")
-#tr = tt.run(index="/data/palotti/terrier/terrier-4.0-trec-cds/var/index", topics="/data/palotti/trec_cds/metamap/default_summary.xml.gz", qexp=False)
 
-
+if __name__ == '__main__':
+    pass
+    # tt = TrecIndri(bin_path="/data/palotti/terrier/terrier-4.0-trec-cds/bin/trec_terrier.sh")
+    # tr = tt.run(index="/data/palotti/terrier/terrier-4.0-trec-cds/var/index", topics="/data/palotti/trec_cds/metamap/default_summary.xml.gz", qexp=False)

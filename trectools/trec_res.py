@@ -10,8 +10,6 @@ import pandas as pd
 from scipy.stats import ttest_rel
 
 
-'''
-'''
 class TrecRes:
 
     def __init__(self, filename=None):
@@ -19,6 +17,8 @@ class TrecRes:
             self.read_res(filename)
         else:
             self.filename = None
+            self.runid = "Null"
+            self.data = None
 
     def __repr__(self):
         return self.__str__()
@@ -41,7 +41,6 @@ class TrecRes:
 
         self.filename = filename
         self.data = pd.read_csv(filename, sep="\s+", names=result_header)
-        #self.runid = self.data[self.data["metric"] == 'runid']["value"].get_values().at[-1] # TODO: replace by at or iat
         self.runid = "Anyone"
 
         if double_values:
@@ -77,9 +76,9 @@ class TrecRes:
         return v.values[0]
 
     def get_results_for_metric(self, metric="P_10"):
-        '''
+        """
             Get the results in a map<query, value> for a giving metric.
-        '''
+        """
         data_slice = self.data[self.data["metric"] == metric]
 
         # We have more than one query, we can ignore the "all" rows
@@ -97,5 +96,3 @@ class TrecRes:
             self.data.pivot("query", "metric", "value").to_csv(outputfilename)
         else:
             print("TODO: outputformat %s is not yet available" % (outputformat))
-
-
