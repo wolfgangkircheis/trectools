@@ -97,7 +97,7 @@ class TrecEval:
         for v in [5, 10, 15, 20, 30, 100, 200, 500, 1000]:
             ps[v] = self.get_precision(depth=v, per_query=False, trec_eval=True)
         map_ = self.get_map(depth=10000, per_query=False, trec_eval=True)
-        gm_map_ = self.get_geometric_MAP(depth=10000, trec_eval=True)
+        gm_map_ = self.get_geometric_map(depth=10000, trec_eval=True)
         bpref_ = self.get_bpref(depth=1000, per_query=False, trec_eval=True)
         rprec_ = self.get_rprec(depth=1000, per_query=False, trec_eval=True)
         recip_rank_ = self.get_reciprocal_rank(depth=1000, per_query=False, trec_eval=True)
