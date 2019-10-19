@@ -193,8 +193,9 @@ class TrecEval:
 
         """
         merged = pd.merge(self.run.run_data[["query","docid"]], self.qrels.qrels_data[["query","docid","rel"]])
-        ## TODO: fix error -- we should not sum the rel as we could have rel > 1
-        result = merged.groupby("query")["rel"].sum()
+
+        result = merged[merged["rel"]>0].groupby("query")["rel"].count()
+
         if per_query:
             return result
         return result.sum()
