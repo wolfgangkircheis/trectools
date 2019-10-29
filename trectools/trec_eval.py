@@ -685,7 +685,7 @@ class TrecEval:
             Returns
             --------
             if per_query == True: returns a pandas dataframe with two cols (query, RBP(p)@d)
-            else: returns a float value representing the RPrec.
+            else: returns a pair of float values representing (RBP(p)@d, RBPResiduals).
 
         """
         label = "RBP(%.2f)@%d" % (p, depth)
@@ -716,7 +716,7 @@ class TrecEval:
             topX["score+1"] = topX["score"].shift(1)
             topX["ntie"] = topX["score"] != topX["score+1"]
             topX["grps"] = topX["ntie"].cumsum()
-            averages = topX[[label,"grps"]].groupby("grps")[label].mean().reset_index().rename(columns={label: "avgs"})
+            averages = topX[[label, "grps"]].groupby("grps")[label].mean().reset_index().rename(columns={label: "avgs"})
             topX = pd.merge(averages, topX)
             topX[label] = topX["avgs"]
             for k in ["score","score+1","ntie","grps","avgs"]:
@@ -743,7 +743,7 @@ class TrecEval:
             return rbp_per_query, rbp_res_per_query - rbp_per_query + p**depth
 
         if rbp_per_query.empty:
-            return 0.0
+            return (np.nan, np.nan)
 
         return (rbp_per_query.sum() / nqueries)[label], (rbp_res_per_query.sum() / nqueries)[label]  + p** depth - (rbp_per_query.sum() / nqueries)[label]
 
