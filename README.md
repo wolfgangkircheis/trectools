@@ -121,7 +121,7 @@ fig = procedures.plot_system_rank(p10, display_metric="P@10", outfile="plot.pdf"
 fig.savefig("plot.pdf", bbox_inches='tight', dpi=600)
 # Sample output with one run for each participating team in robust03:
 ```
-![](robust03/robust03.png)
+![](examples/robust03/robust03.png)
 
 #### Example 1
 Code Snippets for manipulating topic formats and querying different IR toolkits (shown here: Terrier and Indri)
