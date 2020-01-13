@@ -140,7 +140,8 @@ including one recent model called a Raspberry Pi. You start thinking about buyin
 </topic>
 </topics>
 """
-topics = TrecTopics().read_topics_from_file("topics.txt")
+topics = TrecTopics()
+topics.read_topics_from_file("topics.txt")
 # Or...load topics from a Python dictionary
 topics = TrecTopics(topics={'201': u'amazon raspberry pi'})
 topics.printfile(fileformat="terrier")
