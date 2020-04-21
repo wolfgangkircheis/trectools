@@ -217,7 +217,7 @@ class TrecEval:
             topX = self.run.run_data.groupby("query")[["query","docid"]].head(depth)
 
         # check number of queries
-        nqueries = len(self.run.topics())
+        nqueries = len(self.qrels.topics())
 
         selection = pd.merge(topX, self.qrels.qrels_data[["query","docid","rel"]], how="left")
         selection[label] = selection["rel"].isnull()
@@ -253,7 +253,7 @@ class TrecEval:
         qrels = self.qrels.qrels_data
 
         # check number of queries
-        nqueries = len(self.qrels.topics())
+        nqueries = len(self.run.topics())
 
         if removeUnjudged:
             onlyjudged = pd.merge(run, qrels[["query","docid","rel"]], how="left")
@@ -391,7 +391,7 @@ class TrecEval:
         qrels = self.qrels.qrels_data
 
         # check number of queries
-        nqueries = len(self.qrels.topics())
+        nqueries = len(self.run.topics())
 
         if removeUnjudged:
             onlyjudged = pd.merge(run, qrels[["query","docid","rel"]], how="left")
@@ -450,7 +450,7 @@ class TrecEval:
         qrels = self.qrels.qrels_data
 
         # check number of queries
-        nqueries = len(self.qrels.topics())
+        nqueries = len(self.run.topics())
 
         if removeUnjudged:
             onlyjudged = pd.merge(run, qrels[["query","docid","rel"]], how="left")
@@ -522,7 +522,7 @@ class TrecEval:
         label = "Bpref@%d" % (depth)
 
         # check number of queries
-        nqueries = len(self.qrels.topics())
+        nqueries = len(self.run.topics())
 
         qrels = self.qrels.qrels_data.copy()
         run = self.run.run_data
@@ -579,7 +579,7 @@ class TrecEval:
         label = "uBpref@%d" % (depth)
 
         # check number of queries
-        nqueries = len(self.qrels.topics())
+        nqueries = len(self.run.topics())
 
         qrels = self.qrels.qrels_data.copy()
         other = other_qrels.qrels_data.copy()
@@ -646,7 +646,7 @@ class TrecEval:
         label = "P@%d" % (depth)
 
         # check number of queries
-        nqueries = len(self.qrels.topics())
+        nqueries = len(self.run.topics())
 
         qrels = self.qrels.qrels_data
         run = self.run.run_data
@@ -694,7 +694,7 @@ class TrecEval:
         qrels = self.qrels.qrels_data
 
         # check number of queries
-        nqueries = len(self.qrels.topics())
+        nqueries = len(self.run.topics())
 
         if removeUnjudged:
             onlyjudged = pd.merge(run, qrels[["query","docid","rel"]], how="left")
