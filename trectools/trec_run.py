@@ -36,6 +36,9 @@ class TrecRun(object):
     def get_runid(self):
         return self.run_data["system"][0]
 
+    def rename_runid(self, name):
+        self.run_data["system"] = name
+
     def read_run(self, filename):
         self.run_data = pd.read_csv(filename, sep="\s+", names=["query", "q0", "docid", "rank", "score", "system"])
         # Make sure the values are correclty sorted by score
