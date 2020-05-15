@@ -63,6 +63,11 @@ class TrecEval:
                 precision_per_query.rename(columns={"P@%d" % (v): "value"}, inplace=True)
                 results_per_query.append(precision_per_query)
 
+                ndcg_per_query = self.get_ndcg(depth=v, per_query=True, trec_eval=True).reset_index()
+                ndcg_per_query["metric"] = "NDCG_%d" % (v)
+                ndcg_per_query.rename(columns={"NDCG@%d" % (v): "value"}, inplace=True)
+                results_per_query.append(ndcg_per_query)
+
             map_pq = self.get_map(depth=1000, per_query=True, trec_eval=True).reset_index()
             map_pq["metric"] = "map"
             map_pq.rename(columns={"MAP@1000":"value"}, inplace=True)
@@ -94,8 +99,10 @@ class TrecEval:
             results_per_query.append(recip_rank)
 
         ps = {}
+        ndcg = {}
         for v in [5, 10, 15, 20, 30, 100, 200, 500, 1000]:
             ps[v] = self.get_precision(depth=v, per_query=False, trec_eval=True)
+            ndcg[v] = self.get_ndcg(depth=v, per_query=False, trec_eval=True)
         map_ = self.get_map(depth=10000, per_query=False, trec_eval=True)
         gm_map_ = self.get_geometric_map(depth=10000, trec_eval=True)
         bpref_ = self.get_bpref(depth=1000, per_query=False, trec_eval=True)
@@ -122,6 +129,15 @@ class TrecEval:
             {"metric": "P_200", "query": "all", "value": ps[200]},
             {"metric": "P_500", "query": "all", "value": ps[500]},
             {"metric": "P_1000", "query": "all", "value": ps[1000]},
+            {"metric": "NDCG_5", "query": "all", "value": ndcg[5]},
+            {"metric": "NDCG_10", "query": "all", "value": ndcg[10]},
+            {"metric": "NDCG_15", "query": "all", "value": ndcg[15]},
+            {"metric": "NDCG_20", "query": "all", "value": ndcg[20]},
+            {"metric": "NDCG_30", "query": "all", "value": ndcg[30]},
+            {"metric": "NDCG_100", "query": "all", "value": ndcg[100]},
+            {"metric": "NDCG_200", "query": "all", "value": ndcg[200]},
+            {"metric": "NDCG_500", "query": "all", "value": ndcg[500]},
+            {"metric": "NDCG_1000", "query": "all", "value": ndcg[1000]},
         ]
 
         # TODO: iprec_at_recall_LEVEL is missing from the default trec_eval metrics
