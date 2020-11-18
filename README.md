@@ -1,3 +1,10 @@
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python3-1f425f.svg)](https://www.python.org/)
+[![PyPI download month](https://img.shields.io/pypi/dm/trectools.svg)](https://pypi.python.org/pypi/trectools/)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/trectools.svg)](https://pypi.python.org/pypi/trectools/)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/joaopalotti/trectools/graphs/commit-activity)
+[![GitHub watchers](https://img.shields.io/github/watchers/joaopalotti/trectools?style=social&label=Watch&maxAge=2592000)](https://GitHub.com/joaopalotti/trectools/watchers/)
+[![GitHub stars](https://img.shields.io/github/stars/joaopalotti/trectools?style=social&label=Star&maxAge=2592000)](https://GitHub.com/joaopalotti/trectools/stargazers/)
+
 # TREC TOOLS
 
 TrecTools is an open-source Python library for assisting Information Retrieval (IR) practitioners with TREC-like campaigns. 
