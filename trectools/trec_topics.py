@@ -10,7 +10,7 @@ class TrecTopics:
     def __init__(self, topics={}):
         self.topics = topics
 
-    def read_topics_from_file(self, filename, topic_tag="topic", numberid_tag="number", number_attr=True, querytext_tag="query", debug=False):
+    def read_topics_from_file(self, filename, topic_tag="topic", numberid_tag="number", number_attr=True, querytext_tag=None, debug=False):
         """
             Reads a xml file into a TrecTopics object. Example:
             <topics>
@@ -28,13 +28,20 @@ class TrecTopics:
         # TODO: throw an exception for errors when reading the topics.
         soup = BeautifulSoup(codecs.open(filename, "r"), "lxml")
 
+
+        if querytext_tag:
+            parse_query = lambda topic: topic.findNext(querytext_tag).getText()
+        else:
+            #If querytext_tag is not defined then the topic description is within the topic itself.
+            parse_query = lambda topic: topic.getText()
+
         for topic in soup.findAll(topic_tag):
             if number_attr:
                 topic_id = topic.get(numberid_tag)
             else:
                 topic_id = topic.findNext(numberid_tag).getText()
 
-            query = topic.findNext(querytext_tag).getText()
+            query = parse_query(topic)
             if debug:
                 print("Number: %s Query: %s" % (topic_id, query))
             self.topics[topic_id] = query
