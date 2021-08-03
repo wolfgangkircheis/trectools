@@ -1,5 +1,4 @@
 from distutils.core import setup
-#from Cython.Build import cythonize
 
 from setuptools import find_packages, setup
 from setuptools.command.install import install as _install
@@ -17,7 +16,7 @@ requirements = [
 ]
 
 setup(name='trectools',
-        version='0.0.44',
+        version='0.0.45',
         author='Joao Palotti',
         author_email='joaopalotti@gmail.com',
         license='BSD',
@@ -26,6 +25,6 @@ setup(name='trectools',
         #package_dir = {'': '.'},
         url='https://github.com/joaopalotti/trec_tools',
         description='An open-source Python library for assisting Information Retrieval (IR) practitioners with TREC-like campaigns.',
-        long_description=open('README.txt').read()
+        long_description='Have a look at our github page: https://github.com/joaopalotti/trectools'
 )
 
