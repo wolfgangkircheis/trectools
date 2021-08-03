@@ -329,10 +329,38 @@ print("P@25 -- Run 1: %.3f, Run 2: %.3f, Fusion Run: %.3f" % (r1_p25, r2_p25, fu
 fused_run.print_subset("my_fused_run.txt", topics=fused_run.topics())
 ```
 
+# Contributing
 
-## ToDos
-- [x] Upload examples with a famous Trec campaing (e.g., robust3)
-- [ ] Explain other file formats, such as TrecPool
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#Contributing-)<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
+This project belongs to the IR community. We welcome all kinds of contributions. Be part of it!<br>
+<b>Thank you all amazing contributions!</b>
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<a href="https://github.com/joaopalotti"><img src="https://avatars.githubusercontent.com/u/852343?s=400&v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/guidozuc"><img src="https://avatars.githubusercontent.com/u/6101372?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/hscells"><img src="https://avatars.githubusercontent.com/u/6388537?v=4" class="avatar-user" width="50px;"/></a>
+<a href="https://github.com/amallia"><img src="https://avatars.githubusercontent.com/u/9058516?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/bevankoopman"><img src="https://avatars.githubusercontent.com/u/3433630?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/cmacdonald"><img src="https://avatars.githubusercontent.com/u/620938?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/PepijnBoers"><img src="https://avatars.githubusercontent.com/u/18438100?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/lironT74"><img src="https://avatars.githubusercontent.com/u/20051071?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/ishnid"><img src="https://avatars.githubusercontent.com/u/655830?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/guyrosin"><img src="https://avatars.githubusercontent.com/u/1250162?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/Tekaichi"><img src="https://avatars.githubusercontent.com/u/13667847?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/armancohan"><img src="https://avatars.githubusercontent.com/u/6425112?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/binshengliu"><img src="https://avatars.githubusercontent.com/u/441707?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/alonsopg"><img src="https://avatars.githubusercontent.com/u/13632106?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/tonifuc3m"><img src="https://avatars.githubusercontent.com/u/46200970?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/sergeyf"><img src="https://avatars.githubusercontent.com/u/1874668?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/lintool"><img src="https://avatars.githubusercontent.com/u/313837?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/Yu-Shi"><img src="https://avatars.githubusercontent.com/u/3377221?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/nbabulkov"><img src="https://avatars.githubusercontent.com/u/11651240?v=4" class="avatar-user" width="50px;"/></a> 
+<a href="https://github.com/lgienapp"><img src="https://avatars.githubusercontent.com/u/33417815?v=4" class="avatar-user" width="50px;"/></a> 
+
 
 
 
