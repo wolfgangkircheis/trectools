@@ -188,7 +188,7 @@ class TrecEval:
         """
         qrels = self.qrels.qrels_data.copy()
         qrels["relevant_per_query"] = qrels["rel"] > 0
-        total_rel_per_query = qrels.groupby("query")["relevant_per_query"].sum().astype(np.int)
+        total_rel_per_query = qrels.groupby("query")["relevant_per_query"].sum().astype(int)
 
         if per_query:
             return total_rel_per_query
@@ -238,7 +238,7 @@ class TrecEval:
         selection = pd.merge(topX, self.qrels.qrels_data[["query","docid","rel"]], how="left")
         selection[label] = selection["rel"].isnull()
 
-        unjX_per_query = selection[["query", label]].groupby("query").sum().astype(np.int) / depth
+        unjX_per_query = selection[["query", label]].groupby("query").sum().astype(int) / depth
 
         if per_query:
             """ This will return a pandas dataframe with ["query", "UNJ@X"] values """
@@ -677,7 +677,7 @@ class TrecEval:
 
         topX = merged.groupby("query")[["query","docid","rel"]].head(depth)
         topX[label] = topX["rel"] > 0
-        pX_per_query = topX[["query", label]].groupby("query").sum().astype(np.int) / depth
+        pX_per_query = topX[["query", label]].groupby("query").sum().astype(int) / depth
 
         if per_query:
             """ This will return a pandas dataframe with ["query", "P@X"] values """
@@ -892,8 +892,8 @@ class TrecEval:
             return norm.pdf(value, goal, var) * 100. / norm.pdf(goal, goal, var)
 
         # TODO: now I am forcing the queries to be integer. Need to find a better way to cope with different data types
-        selection["query"] = selection["query"].astype(np.int)
-        goals["query"] = goals["query"].astype(np.int)
+        selection["query"] = selection["query"].astype(int)
+        goals["query"] = goals["query"].astype(int)
 
         selection = pd.merge(selection, goals)
         selection["rel_other"] = selection[["rel_other", "mean", "var"]].\
