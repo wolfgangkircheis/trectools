@@ -42,7 +42,7 @@ class TrecRun(object):
     def read_run(self, filename):
         self.run_data = pd.read_csv(filename, sep="\s+", names=["query", "q0", "docid", "rank", "score", "system"])
         # Make sure the values are correclty sorted by score
-        self.run_data.sort_values(["query","score"], inplace=True, ascending=[True,False])
+        self.run_data.sort_values(["query", "score", "docid"], inplace=True, ascending=[True, False, True])
         self.filename = filename
 
     def get_full_filename_path(self):
