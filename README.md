@@ -4,6 +4,7 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/joaopalotti/trectools/graphs/commit-activity)
 [![GitHub watchers](https://img.shields.io/github/watchers/joaopalotti/trectools?style=social&label=Watch&maxAge=2592000)](https://GitHub.com/joaopalotti/trectools/watchers/)
 [![GitHub stars](https://img.shields.io/github/stars/joaopalotti/trectools?style=social&label=Star&maxAge=2592000)](https://GitHub.com/joaopalotti/trectools/stargazers/)
+[![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](https://github.com/joaopalotti/trectools/#contributing)<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # TREC TOOLS
 
@@ -330,9 +331,6 @@ fused_run.print_subset("my_fused_run.txt", topics=fused_run.topics())
 ```
 
 # Contributing
-
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#Contributing-)<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 This project belongs to the IR community. We welcome all kinds of contributions. Be part of it!<br>
 <b>Thank you all amazing contributions!</b>
