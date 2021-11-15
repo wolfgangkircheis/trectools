@@ -333,7 +333,7 @@ fused_run.print_subset("my_fused_run.txt", topics=fused_run.topics())
 # Contributing
 
 This project belongs to the IR community. We welcome all kinds of contributions. Be part of it!<br>
-<b>Thank you all amazing contributions!</b>
+<b>Thank you all amazing contributors!</b>
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
