@@ -16,7 +16,7 @@ requirements = [
 ]
 
 setup(name='trectools',
-        version='0.0.47',
+        version='0.0.48',
         author='Joao Palotti',
         author_email='joaopalotti@gmail.com',
         license='BSD',

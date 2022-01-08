@@ -77,6 +77,11 @@ class TrecQrel:
         self.filename = filename
         self.qrels_data = pd.read_csv(filename, sep="\s+", names=qrels_header)
 
+        if "docid" in self.qrels_data:
+            self.qrels_data["docid"] = self.qrels_data["docid"].astype(str)
+        if "q0" in self.qrels_data:
+            self.qrels_data["q0"] = self.qrels_data["q0"].astype(str)
+
         # Removes the files that were not judged:
         self.qrels_data = self.qrels_data[self.qrels_data["rel"] >= 0]
 
