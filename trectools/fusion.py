@@ -84,8 +84,7 @@ def combos(trec_runs, strategy="sum", max_docs=1000):
     merged_run = TrecRun(None)
     df = pd.DataFrame(rows)
     df.columns = ["query", "q0", "docid", "rank", "score", "system"]
-    df["q0"] = df["q0"].astype(np.str)
-    merged_run.run_data = df.copy()
+    merged_run.load_run_from_dataframe(df)
 
     return merged_run
 
@@ -128,8 +127,7 @@ def vector_space_fusion(trec_runs, max_docs=1000):
     merged_run = TrecRun(None)
     df = pd.DataFrame(rows)
     df.columns = ["query", "q0", "docid", "rank", "score", "system"]
-    df["q0"] = df["q0"].astype(np.str)
-    merged_run.run_data = df.copy()
+    merged_run.load_run_from_dataframe(df)
 
     return merged_run
 
@@ -165,8 +163,7 @@ def reciprocal_rank_fusion(trec_runs, k=60, max_docs=1000):
     merged_run = TrecRun(None)
     df = pd.DataFrame(rows)
     df.columns = ["query", "q0", "docid", "rank", "score", "system"]
-    df["q0"] = df["q0"].astype(np.str)
-    merged_run.run_data = df.copy()
+    merged_run.load_run_from_dataframe(df)
 
     return merged_run
 
@@ -203,8 +200,7 @@ def rank_biased_precision_fusion(trec_runs, p=0.80, max_docs=1000):
     merged_run = TrecRun(None)
     df = pd.DataFrame(rows)
     df.columns = ["query", "q0", "docid", "rank", "score", "system"]
-    df["q0"] = df["q0"].astype(np.str)
-    merged_run.run_data = df.copy()
+    merged_run.load_run_from_dataframe(df)
 
     return merged_run
 

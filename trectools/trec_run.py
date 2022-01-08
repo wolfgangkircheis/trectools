@@ -18,7 +18,7 @@ from trectools import TrecRes
 '''
 class TrecRun(object):
     def __init__(self, filename=None):
-        if filename:
+        if filename is not None:
             self.read_run(filename)
         else:
             self.filename = None
@@ -41,9 +41,21 @@ class TrecRun(object):
 
     def read_run(self, filename):
         self.run_data = pd.read_csv(filename, sep="\s+", names=["query", "q0", "docid", "rank", "score", "system"])
-        # Make sure the values are correclty sorted by score
+        # Make sure the values are correctly sorted by score
         self.run_data.sort_values(["query", "score", "docid"], inplace=True, ascending=[True, False, True])
+        # We assume that docid is a string
+        self.run_data["docid"] = self.run_data["docid"].astype(str)
         self.filename = filename
+
+    def load_run_from_dataframe(self, df):
+        required_cols = ["query", "q0", "docid", "rank", "score", "system"]
+        for c in required_cols:
+            if c not in df.keys():
+                print("Error: col %s is not in the dataframe. Aborting." % c)
+
+        self.run_data = df.copy()
+        self.run_data["q0"] = self.run_data["q0"].astype(str)
+        # self.run_data["docid"] = self.run_data["docid"].astype(str)
 
     def get_full_filename_path(self):
         """
@@ -108,8 +120,8 @@ class TrecRun(object):
         """
             Check the intersection of two runs for the topX documents.
         """
-        runA = self.run_data[["query", "docid"]].groupby("query")[["query","docid"]].head(topX)
-        runB = another_run.run_data[["query", "docid"]].groupby("query")[["query","docid"]].head(topX)
+        runA = self.run_data[["query", "docid"]].groupby("query")[["query", "docid"]].head(topX)
+        runB = another_run.run_data[["query", "docid"]].groupby("query")[["query", "docid"]].head(topX)
 
         common_topics = set(runA["query"].unique()).intersection(runB["query"].unique())
 
@@ -128,6 +140,6 @@ class TrecRun(object):
         return np.mean(covs)
 
     def print_subset(self, filename, topics):
-        dslice = self.run_data[self.run_data["query"].apply(lambda x: x in set(topics))]
-        dslice.sort_values(by=["query","score"], ascending=[True,False]).to_csv(filename, sep=" ", header=False, index=False)
-        print("File %s writen." % (filename))
+        df_slice = self.run_data[self.run_data["query"].apply(lambda x: x in set(topics))]
+        df_slice.sort_values(by=["query", "score"], ascending=[True, False]).to_csv(filename, sep=" ", header=False, index=False)
+        print("File %s writen." % filename)
