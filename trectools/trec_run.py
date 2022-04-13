@@ -63,7 +63,7 @@ class TrecRun(object):
         # Make sure the values are correctly sorted by score
         self.run_data.sort_values(["query", "score", "docid"], inplace=True, ascending=[True, False, True])
 
-    def load_run_from_dataframe`(self, df, column_mapping=None, validate=True):
+    def load_run_from_dataframe(self, df, column_mapping=None, validate=True):
         # Apply column mapping if specified
         if column_mapping is not None:
             df = df.rename(columns=column_mapping)
