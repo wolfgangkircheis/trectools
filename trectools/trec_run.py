@@ -63,24 +63,28 @@ class TrecRun(object):
         # Make sure the values are correctly sorted by score
         self.run_data.sort_values(["query", "score", "docid"], inplace=True, ascending=[True, False, True])
 
-    def load_run_from_dataframe(self, df, column_mapping=None):
+    def load_run_from_dataframe`(self, df, column_mapping=None, validate=True):
         # Apply column mapping if specified
         if column_mapping is not None:
             df = df.rename(columns=column_mapping)
 
         # Check if supplied (and optionally renamed) dataframe conforms to required columns
-        required_cols = ["query", "q0", "docid", "rank", "score", "system"]
-        for c in required_cols:
-            if c not in df.keys():
-                print("Error: col %s is not in the dataframe. Aborting." % c)
+        if validate:
+            required_cols = ["query", "q0", "docid", "rank", "score", "system"]
+            for c in required_cols:
+                if c not in df.keys():
+                    print("Error: col %s is not in the dataframe. Aborting." % c)
 
         self.run_data = df.copy()
-        # Enforce string type on docid column
-        self.run_data["docid"] = self.run_data["docid"].astype(str)
-        # Enforce string type on q0 column
-        self.run_data["q0"] = self.run_data["q0"].astype(str)
-        # Enforce string type on query column
-        self.run_data["query"] = self.run_data["query"].astype(str)
+        ## Enforce string type on docid column (if present)
+        if "docid" in self.run_data:
+            self.run_data["docid"] = self.run_data["docid"].astype(str)
+        # Enforce string type on q0 column (if present)
+        if "q0" in self.run_data:
+            self.run_data["q0"] = self.run_data["q0"].astype(str)
+        # Enforce string type on query column (if present)
+        if "query" in self.run_data:
+            self.run_data["query"] = self.run_data["query"].astype(str)
 
     def get_full_filename_path(self):
         """
