@@ -83,10 +83,10 @@ class TrecRun(object):
         self.run_data["query"] = self.run_data["query"].astype(str)
 
     def get_full_filename_path(self):
-            """
-                Returns the full path of the run file.
-            """
-            return os.path.abspath(os.path.expanduser(self.filename))
+        """
+            Returns the full path of the run file.
+        """
+        return os.path.abspath(os.path.expanduser(self.filename))
 
     def get_filename(self):
         """
