@@ -70,10 +70,10 @@ class TrecRun(object):
 
         # Check if supplied (and optionally renamed) dataframe conforms to required columns
         if validate:
-            required_cols = ["query", "q0", "docid", "rank", "score", "system"]
-            for c in required_cols:
-                if c not in df.keys():
-                    print("Error: col %s is not in the dataframe. Aborting." % c)
+            required_cols = {"query", "q0", "docid", "rank", "score", "system"}
+            missing = list(required_cols.difference(set(df.keys())))
+            if len(missing) > 0:
+                raise ValueError(f"Required column(s) {missing} not present in supplied dataframe")
 
         self.run_data = df.copy()
         ## Enforce string type on docid column (if present)
