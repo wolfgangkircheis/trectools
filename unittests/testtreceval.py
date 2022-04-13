@@ -14,7 +14,7 @@ class TestTrecEval(unittest.TestCase):
 
         # Contains the first 30 documents for the first 10 topics in input.uic0301
         run3 = TrecRun("./files/input.uic0301_top30")
-        self.common_topics = [303, 307, 310, 314, 320, 322, 325, 330, 336, 341]
+        self.common_topics = ["303", "307", "310", "314", "320", "322", "325", "330", "336", "341"]
         self.teval1 = TrecEval(run1, qrels1)
         self.teval2 = TrecEval(run2, qrels2)
         self.teval3 = TrecEval(run3, qrels2)
@@ -37,7 +37,7 @@ class TestTrecEval(unittest.TestCase):
 
         results = self.teval2.get_reciprocal_rank(depth=1000, trec_eval=True, per_query=True)
         correct_results = [0.0017, 0.1429, 0.3333]
-        values = map(float, results.loc[[378,650,624]].values)
+        values = map(float, results.loc[["378","650","624"]].values)
         for v, c in zip(values, correct_results):
             self.assertAlmostEqual(v, c, places=4)
 
@@ -56,7 +56,7 @@ class TestTrecEval(unittest.TestCase):
 
         results = self.teval2.get_map(depth=1000, trec_eval=True, per_query=True)
         correct_results = [0.4926, 0.2808, 0.2335]
-        values = map(float, results.loc[[622, 609, 320]].values)
+        values = map(float, results.loc[["622", "609", "320"]].values)
         for v, c in zip(values, correct_results):
             self.assertAlmostEqual(v, c, places=4)
 
@@ -75,12 +75,11 @@ class TestTrecEval(unittest.TestCase):
         values1 = self.teval2.get_precision(depth=500, per_query=True, trec_eval=True).loc[self.common_topics].values
         values2 = self.teval3.get_precision(depth=500, per_query=True, trec_eval=True).loc[self.common_topics].values
         for v1, v2 in zip(values1, values2):
-            print(v1,v2)
             self.assertNotAlmostEqual(float(v1), float(v2), places=4)
 
         results = self.teval2.get_precision(depth=30, trec_eval=True, per_query=True)
         correct_results = [0.1333, 0.0333, 0.5333]
-        values = map(float, results.loc[[607, 433, 375]].values)
+        values = map(float, results.loc[["607", "433", "375"]].values)
         for v, c in zip(values, correct_results):
             self.assertAlmostEqual(v, c, places=4)
 

@@ -12,7 +12,7 @@ class TestTrecRun(unittest.TestCase):
 
     def test_topics(self):
         topics = self.run.topics()
-        self.assertListEqual(topics, [1,2])
+        self.assertListEqual(topics, ["1","2"])
 
     def test_get_filename(self):
         self.assertEqual(self.run.get_filename(), "r1.run")
@@ -24,11 +24,11 @@ class TestTrecRun(unittest.TestCase):
     def test_topics_intersection_with(self):
         another_run = TrecRun("./files/r2.run")
         intersection = self.run.topics_intersection_with(another_run)
-        self.assertSetEqual(intersection, set([1]))
+        self.assertSetEqual(intersection, {"1"})
 
     def test_get_top_documents(self):
-        topic1_top2 = self.run.get_top_documents(1, n=2)
-        topic2_top2 = self.run.get_top_documents(2, n=2)
+        topic1_top2 = self.run.get_top_documents("1", n=2)
+        topic2_top2 = self.run.get_top_documents("2", n=2)
         self.assertListEqual(topic1_top2, ["doc1_1", "doc1_2"])
         self.assertListEqual(topic2_top2, ["doc2_1", "doc2_3"])
 

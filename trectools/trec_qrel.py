@@ -73,14 +73,26 @@ class TrecQrel:
         dslice[["query", "q0", "docid", "rel"]].to_csv(filename, sep=" ", header=False, index=False)
         print("File %s writen." % (filename))
 
-    def read_qrel(self, filename, qrels_header=["query","q0","docid","rel"]):
+    def read_qrel(self, filename, qrels_header=None):
+        # Replace with default argument for qrel_header
+        if qrels_header is None:
+            qrels_header = ["query", "q0", "docid", "rel"]
+
+        # Set filename
         self.filename = filename
+
+        # Read data from file
         self.qrels_data = pd.read_csv(filename, sep="\s+", names=qrels_header)
 
+        # Enforce string type on docid column (if present)
         if "docid" in self.qrels_data:
             self.qrels_data["docid"] = self.qrels_data["docid"].astype(str)
+        # Enforce string type on q0 column (if present)
         if "q0" in self.qrels_data:
             self.qrels_data["q0"] = self.qrels_data["q0"].astype(str)
+        # Enforce string type on query column (if present)
+        if "query" in self.qrels_data:
+            self.qrels_data["query"] = self.qrels_data["query"].astype(str)
 
         # Removes the files that were not judged:
         self.qrels_data = self.qrels_data[self.qrels_data["rel"] >= 0]

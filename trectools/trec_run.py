@@ -39,29 +39,54 @@ class TrecRun(object):
     def rename_runid(self, name):
         self.run_data["system"] = name
 
-    def read_run(self, filename):
-        self.run_data = pd.read_csv(filename, sep="\s+", names=["query", "q0", "docid", "rank", "score", "system"])
-        # Make sure the values are correctly sorted by score
-        self.run_data.sort_values(["query", "score", "docid"], inplace=True, ascending=[True, False, True])
-        # We assume that docid is a string
-        self.run_data["docid"] = self.run_data["docid"].astype(str)
+    def read_run(self, filename, run_header=None):
+        # Replace with default argument for run_header
+        if run_header is None:
+            run_header = ["query", "q0", "docid", "rank", "score", "system"]
+
+        # Set filename
         self.filename = filename
 
-    def load_run_from_dataframe(self, df):
+        # Read data from file
+        self.run_data = pd.read_csv(filename, sep="\s+", names=run_header)
+
+        # Enforce string type on docid column (if present)
+        if "docid" in self.run_data:
+            self.run_data["docid"] = self.run_data["docid"].astype(str)
+        # Enforce string type on q0 column (if present)
+        if "q0" in self.run_data:
+            self.run_data["q0"] = self.run_data["q0"].astype(str)
+        # Enforce string type on query column (if present)
+        if "query" in self.run_data:
+            self.run_data["query"] = self.run_data["query"].astype(str)
+
+        # Make sure the values are correctly sorted by score
+        self.run_data.sort_values(["query", "score", "docid"], inplace=True, ascending=[True, False, True])
+
+    def load_run_from_dataframe(self, df, column_mapping=None):
+        # Apply column mapping if specified
+        if column_mapping is not None:
+            df = df.rename(columns=column_mapping)
+
+        # Check if supplied (and optionally renamed) dataframe conforms to required columns
         required_cols = ["query", "q0", "docid", "rank", "score", "system"]
         for c in required_cols:
             if c not in df.keys():
                 print("Error: col %s is not in the dataframe. Aborting." % c)
 
         self.run_data = df.copy()
+        # Enforce string type on docid column
+        self.run_data["docid"] = self.run_data["docid"].astype(str)
+        # Enforce string type on q0 column
         self.run_data["q0"] = self.run_data["q0"].astype(str)
-        # self.run_data["docid"] = self.run_data["docid"].astype(str)
+        # Enforce string type on query column
+        self.run_data["query"] = self.run_data["query"].astype(str)
 
     def get_full_filename_path(self):
-        """
-            Returns the full path of the run file.
-        """
-        return os.path.abspath(os.path.expanduser(self.filename))
+            """
+                Returns the full path of the run file.
+            """
+            return os.path.abspath(os.path.expanduser(self.filename))
 
     def get_filename(self):
         """
