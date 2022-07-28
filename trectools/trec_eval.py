@@ -373,7 +373,7 @@ class TrecEval:
         # MAP is the sum of individual's contribution
         map_per_query = selection[["query", label]].groupby("query").sum()
         relevant_docs[label] = relevant_docs["rel"]
-        nrel_per_query = relevant_docs[["query",label]].groupby("query").sum()
+        nrel_per_query = relevant_docs[["query",label]].groupby("query").head(depth).groupby("query").sum()
         map_per_query = map_per_query / nrel_per_query
 
         if per_query:
