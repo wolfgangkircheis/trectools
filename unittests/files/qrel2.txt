@@ -1,0 +1,11 @@
+q1 0 doc01 1
+q1 0 doc02 1
+q1 0 doc03 1
+q1 0 doc04 1
+q1 0 doc05 1
+q1 0 doc06 1
+q1 0 doc07 1
+q1 0 doc08 1
+q1 0 doc09 1
+q1 0 doc10 1
+
