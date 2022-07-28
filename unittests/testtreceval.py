@@ -18,6 +18,12 @@ class TestTrecEval(unittest.TestCase):
         self.teval1 = TrecEval(run1, qrels1)
         self.teval2 = TrecEval(run2, qrels2)
         self.teval3 = TrecEval(run3, qrels2)
+        
+        # Check that mAP@k is calculated correctly if k is lesser
+        # than the number of relevant documents in the pool
+        run5 = TrecRun("./files/r5.run")
+        qrels3 = TrecQrel("./files/qrel2.txt")
+        self.teval5 = TrecEval(run5, qrels3)
 
     def tearDown(self):
         pass
@@ -59,6 +65,9 @@ class TestTrecEval(unittest.TestCase):
         values = map(float, results.loc[["622", "609", "320"]].values)
         for v, c in zip(values, correct_results):
             self.assertAlmostEqual(v, c, places=4)
+        
+        self.assertEqual(self.teval5.get_map(5), 1.0)
+        self.assertEqual(self.teval5.get_map(10), 0.5)
 
     def test_get_precision(self):
         value = self.teval1.get_precision(depth=1000, trec_eval=True)
